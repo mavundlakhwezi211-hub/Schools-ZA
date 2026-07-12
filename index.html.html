@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create Profile</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins', Arial, sans-serif;
+}
+
+body{
+    background:#1c0e9c;
+    color:#173b5e;
+    min-height:100vh;
+    overflow-x:hidden;
+}
+
+.welcome-page{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+    background:linear-gradient(135deg, #173b5e, #0d2944);
+}
+
+@media (max-width: 640px){
+    .welcome-page,
+    .form-page{
+        padding:14px;
+    }
+
+    .welcome-card,
+    .container{
+        padding:24px;
+        border-radius:16px;
+    }
+
+    .welcome-card h1{
+        font-size:26px;
+    }
+
+    .start-btn,
+    .submit-btn{
+        width:100%;
+        text-align:center;
+    }
+
+    .search-box{
+        flex-direction:column;
+    }
+
+    .search-box button{
+        width:100%;
+    }
+}
+
+.welcome-card{
+    background:rgba(255,255,255,0.95);
+    color:#173b5e;
+    width:100%;
+    max-width:560px;
+    padding:35px;
+    border-radius:18px;
+    text-align:center;
+    box-shadow:0 12px 30px rgba(0,0,0,0.25);
+}
+
+.welcome-card h1{
+    margin-bottom:10px;
+    font-size:32px;
+}
+
+.welcome-card p{
+    margin-bottom:18px;
+    color:#666;
+    line-height:1.6;
+}
+
+.hero-illustration{
+    margin:18px auto 22px;
+    width:100%;
+    max-width:320px;
+    padding:12px;
+    border-radius:16px;
+    background:linear-gradient(135deg, #f8fbff, #dceeff);
+    border:2px solid #cfe3f7;
+}
+
+.start-btn{
+    display:inline-block;
+    background:#173b5e;
+    color:#fff;
+    padding:14px 24px;
+    border-radius:10px;
+    text-decoration:none;
+    font-size:18px;
+    font-weight:bold;
+}
+
+.start-btn:hover{
+    background:#0f2a45;
+}
+
+.form-page{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+    background:
+        radial-gradient(circle at top left, rgba(255,255,255,0.25), transparent 32%),
+        linear-gradient(135deg, #173b5e 0%, #0d2944 100%);
+}
+
+.container{
+    background:rgba(255,255,255,0.9);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    width:100%;
+    max-width:480px;
+    padding:32px;
+    border-radius:20px;
+    box-shadow:0 16px 40px rgba(13,41,68,0.16);
+    color:#173b5e;
+    border:1px solid rgba(255,255,255,0.5);
+}
+
+h1{
+    text-align:center;
+    color:#173b5e;
+    margin-bottom:10px;
+    font-family:'Satoshi', 'General Sans', sans-serif;
+    font-weight:700;
+}
+
+.subtitle{
+    text-align:center;
+    color:#5d6f80;
+    margin-bottom:25px;
+    font-size:15px;
+}
+
+.input-group{
+    margin-bottom:18px;
+}
+
+input,select{
+    width:100%;
+    padding:14px 15px;
+    border:1px solid rgba(23,59,94,0.18);
+    border-radius:12px;
+    font-size:16px;
+    background:rgba(255,255,255,0.8);
+    color:#2d1b4e;
+    transition:border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input:focus,select:focus{
+    outline:none;
+    border-color:#173b5e;
+    box-shadow:0 0 0 3px rgba(23,59,94,0.12);
+}
+
+label{
+    display:block;
+    margin-bottom:8px;
+    font-weight:600;
+    color:#173b5e;
+    font-family:'Satoshi', 'General Sans', sans-serif;
+}
+
+.search-box{
+    display:flex;
+    gap:10px;
+    align-items:flex-start;
+}
+
+.search-box input{
+    flex:1;
+}
+
+.search-box button{
+    width:60px;
+    border:none;
+    border-radius:12px;
+    background:#173b5e;
+    color:#fff;
+    font-size:22px;
+    cursor:pointer;
+    padding:12px 0;
+    box-shadow:0 8px 20px rgba(13,41,68,0.16);
+}
+
+.school-select{
+    width:100%;
+    margin-top:10px;
+    padding:10px;
+    border:1px solid rgba(23,59,94,0.15);
+    border-radius:12px;
+    min-height:180px;
+    background:rgba(255,255,255,0.9);
+    display:none;
+}
+
+.no-result-msg{
+    margin-top:10px;
+    padding:10px;
+    border-radius:10px;
+    background:rgba(255,240,246,0.9);
+    color:#a33b65;
+    border:1px solid rgba(163,59,101,0.18);
+    display:none;
+    font-size:14px;
+}
+
+.submit-btn{
+    width:100%;
+    background:#173b5e;
+    color:#fff;
+    padding:16px;
+    border:none;
+    border-radius:12px;
+    font-size:20px;
+    cursor:pointer;
+    margin-top:20px;
+    font-weight:600;
+    box-shadow:0 10px 22px rgba(13,41,68,0.18);
+}
+
+.submit-btn:hover{
+    background:#0f2a45;
+}
+
+.summary-panel{
+    display:grid;
+    gap:16px;
+    margin-top:20px;
+    padding:22px;
+    border-radius:18px;
+    background:linear-gradient(135deg, rgba(23,59,94,0.06), rgba(23,59,94,0.02));
+    border:1px solid rgba(23,59,94,0.14);
+}
+
+.profile-card{
+    background:#fff;
+    border-radius:16px;
+    padding:20px;
+    box-shadow:0 12px 30px rgba(13,41,68,0.12);
+    border:1px solid rgba(23,59,94,0.12);
+}
+
+.profile-card-top{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    margin-bottom:14px;
+}
+
+.avatar{
+    width:54px;
+    height:54px;
+    border-radius:50%;
+    display:grid;
+    place-items:center;
+    background:linear-gradient(135deg, #173b5e, #3a79b8);
+    color:#fff;
+    font-size:24px;
+    font-weight:700;
+    flex-shrink:0;
+}
+
+.profile-card h2{
+    font-size:22px;
+    color:#173b5e;
+    margin:0;
+}
+
+.profile-card .meta{
+    color:#5d6f80;
+    font-size:14px;
+    margin-top:4px;
+}
+
+.profile-stats{
+    display:grid;
+    gap:10px;
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+}
+
+.stat-pill{
+    border-radius:12px;
+    padding:10px 12px;
+    background:rgba(23,59,94,0.06);
+    color:#173b5e;
+}
+
+.stat-pill span{
+    display:block;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    color:#5d6f80;
+    margin-bottom:4px;
+}
+
+.stat-pill strong{
+    font-size:14px;
+}
+
+.activity-feed{
+    background:#fff;
+    border-radius:16px;
+    padding:16px;
+    border:1px solid rgba(23,59,94,0.12);
+    box-shadow:0 10px 24px rgba(13,41,68,0.1);
+}
+
+.activity-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:10px;
+}
+
+.activity-title{
+    font-size:16px;
+    font-weight:700;
+    color:#173b5e;
+}
+
+.feed-badge{
+    font-size:12px;
+    color:#0f2a45;
+    background:#dceeff;
+    padding:6px 10px;
+    border-radius:999px;
+    font-weight:600;
+}
+
+.activity-item{
+    display:flex;
+    gap:10px;
+    padding:10px 0;
+    border-top:1px solid rgba(23,59,94,0.1);
+}
+
+.activity-item:first-of-type{
+    border-top:none;
+    padding-top:0;
+}
+
+.activity-icon{
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    display:grid;
+    place-items:center;
+    background:#173b5e;
+    color:#fff;
+    font-size:15px;
+    flex-shrink:0;
+}
+
+.activity-meta{
+    font-size:13px;
+    color:#5d6f80;
+    margin-top:3px;
+}
+
+.result-actions{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+}
+
+.result-actions .submit-btn{
+    margin-top:0;
+    flex:1;
+    min-width:140px;
+}
+
+.result-actions .submit-btn.secondary{
+    background:#f4f7fb;
+    color:#173b5e;
+    box-shadow:none;
+    border:1px solid rgba(23,59,94,0.12);
+}
+
+.result-actions .submit-btn.secondary:hover{
+    background:#eaf2fa;
+}
+</style>
+</head>
+<body>
+<section class="welcome-page">
+    <div class="welcome-card">
+        <h1>Welcome!</h1>
+        <p>We’re glad you’re here. Create your profile and get connected with schools in South Africa.</p>
+
+        <div class="hero-illustration" aria-label="Cartoon children smiling and waving">
+            <svg viewBox="0 0 320 180" width="100%" height="auto" role="img">
+                <circle cx="78" cy="58" r="18" fill="#f4c27a"></circle>
+                <rect x="62" y="76" width="32" height="46" rx="12" fill="#173b5e"></rect>
+                <path d="M72 106 L52 132" stroke="#173b5e" stroke-width="5" stroke-linecap="round"></path>
+                <path d="M94 106 L114 132" stroke="#173b5e" stroke-width="5" stroke-linecap="round"></path>
+                <path d="M75 84 L46 82" stroke="#173b5e" stroke-width="5" stroke-linecap="round"></path>
+                <path d="M84 86 L110 72" stroke="#173b5e" stroke-width="5" stroke-linecap="round"></path>
+                <circle cx="71" cy="58" r="2.2" fill="#222"></circle>
+                <circle cx="85" cy="58" r="2.2" fill="#222"></circle>
+                <path d="M69 67 Q78 75 87 67" stroke="#222" stroke-width="2.5" fill="none" stroke-linecap="round"></path>
+
+                <circle cx="180" cy="54" r="15" fill="#f2b89b"></circle>
+                <rect x="166" y="69" width="28" height="44" rx="10" fill="#f4a261"></rect>
+                <path d="M176 112 L154 136" stroke="#f4a261" stroke-width="5" stroke-linecap="round"></path>
+                <path d="M194 112 L214 136" stroke="#f4a261" stroke-width="5" stroke-linecap="round"></path>
+                <path d="M176 80 L148 74" stroke="#f4a261" stroke-width="5" stroke-linecap="round"></path>
+                <path d="M188 80 L214 70" stroke="#f4a261" stroke-width="5" stroke-linecap="round"></path>
+                <circle cx="173" cy="54" r="2.2" fill="#222"></circle>
+                <circle cx="187" cy="54" r="2.2" fill="#222"></circle>
+                <path d="M171 63 Q180 71 189 63" stroke="#222" stroke-width="2.5" fill="none" stroke-linecap="round"></path>
+
+                <circle cx="248" cy="62" r="16" fill="#8ecae6"></circle>
+                <rect x="232" y="78" width="32" height="46" rx="12" fill="#2a9d8f"></rect>
+                <path d="M242 124 L220 144" stroke="#2a9d8f" stroke-width="5" stroke-linecap="round"></path>
+                <path d="M258 124 L278 144" stroke="#2a9d8f" stroke-width="5" stroke-linecap="round"></path>
+                <path d="M242 86 L218 96" stroke="#2a9d8f" stroke-width="5" stroke-linecap="round"></path>
+                <path d="M254 86 L284 78" stroke="#2a9d8f" stroke-width="5" stroke-linecap="round"></path>
+                <circle cx="241" cy="62" r="2.2" fill="#222"></circle>
+                <circle cx="255" cy="62" r="2.2" fill="#222"></circle>
+                <path d="M239 71 Q248 79 257 71" stroke="#222" stroke-width="2.5" fill="none" stroke-linecap="round"></path>
+
+                <path d="M24 152 C70 125, 130 122, 190 150" stroke="#7bc96f" stroke-width="10" fill="none" stroke-linecap="round"></path>
+                <path d="M190 150 C236 126, 284 124, 298 150" stroke="#f4c542" stroke-width="10" fill="none" stroke-linecap="round"></path>
+            </svg>
+        </div>
+
+        <a href="#create-profile" class="start-btn">Get Started</a>
+    </div>
+</section>
+
+<section class="form-page" id="create-profile">
+    <div class="container">
+        <h1>Create Your Profile</h1>
+        <p class="subtitle">Complete your profile to get started</p>
+
+        <form id="profileForm">
+            <div class="input-group">
+                <input type="text" id="fullName" name="fullName" placeholder="Full Name" required>
+            </div>
+
+            <div class="input-group">
+                <select id="roleSelect" name="role">
+                    <option value="">Select Role</option>
+                    <option>Student</option>
+                    <option>Teacher</option>
+                    <option>Parent</option>
+                    <option>Administrator</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>Select Province</label>
+                <select id="provinceSelect" name="province">
+                    <option>GAUTENG</option>
+                    <option>KwaZulu-Natal</option>
+                    <option>Western Cape</option>
+                    <option>Eastern Cape</option>
+                    <option>Limpopo</option>
+                    <option>Mpumalanga</option>
+                    <option>North West</option>
+                    <option>Free State</option>
+                    <option>Northern Cape</option>
+                </select>
+            </div>
+
+            <p style="margin-bottom:10px;color:#666;">Search for your school name and tap the button.</p>
+
+            <div class="search-box">
+                <input type="search" id="schoolSearch" name="schoolSearch" placeholder="Search school name" autocomplete="off" spellcheck="false">
+                <button type="button" id="searchSchoolBtn">🔍</button>
+            </div>
+
+            <input type="hidden" id="selectedSchool" name="selectedSchool">
+            <select id="schoolSelect" class="school-select" size="8">
+                <option value="">Select a school</option>
+                <option>Acornhoek Secondary</option>
+                <option>Alexandra High School</option>
+                <option>Belhar High School</option>
+                <option>Boitshepi Secondary School</option>
+                <option>Casteel Secondary</option>
+                <option>Curro Durbanville</option>
+                <option>Durban Girls' College</option>
+                <option>Dwarsloop Secondary</option>
+                <option>East London Secondary School</option>
+                <option>Glenwood High School</option>
+                <option>Hazyview Comprehensive School</option>
+                <option>Hoxani Secondary</option>
+                <option>Jeppe High School for Boys</option>
+                <option>Khanyisani Secondary School</option>
+                <option>King Edward VII School</option>
+                <option>KwaMashu Secondary School</option>
+                <option>Lekazi Secondary</option>
+                <option>Mapulaneng Secondary</option>
+                <option>Maritzburg College</option>
+                <option>Masoyi Secondary</option>
+                <option>Matsulu Secondary</option>
+                <option>Maviljan Secondary</option>
+                <option>Mkhuhlu East Secondary</option>
+                <option>Mkhuhlu Secondary</option>
+                <option>Mshadza Secondary</option>
+                <option>Northwood School</option>
+                <option>Phumelela Secondary</option>
+                <option>Pretoria Boys High School</option>
+                <option>Rondebosch Boys' High School</option>
+                <option>Shishila Secondary</option>
+                <option>Sibuyile Secondary</option>
+                <option>Sitintile Secondary</option>
+                <option>Siyabuswa Secondary</option>
+                <option>St Stithians College</option>
+                <option>Thulamahashe East Secondary</option>
+                <option>Thulamahashe Secondary</option>
+                <option>Witbank High School</option>
+                <option>Zolani High School</option>
+            </select>
+
+            <div id="noResultMsg" class="no-result-msg">Your school is not available 😢</div>
+
+            <div class="input-group" style="margin-top:20px;">
+                <input type="email" id="emailInput" name="email" placeholder="Email Address" required>
+            </div>
+
+            <div class="input-group">
+                <input type="tel" id="phoneInput" name="phone" placeholder="Phone Number (Optional)">
+            </div>
+
+            <button class="submit-btn">Create Profile</button>
+        </form>
+    </div>
+</section>
+
+<script>
+    const form = document.getElementById('profileForm');
+    const schoolSearchInput = document.getElementById('schoolSearch');
+    const schoolSelect = document.getElementById('schoolSelect');
+    const selectedSchoolInput = document.getElementById('selectedSchool');
+    const searchSchoolBtn = document.getElementById('searchSchoolBtn');
+    const storageKey = 'schoolProfileData';
+
+    function saveFormData() {
+        const data = {
+            fullName: document.getElementById('fullName').value.trim(),
+            role: document.getElementById('roleSelect').value,
+            province: document.getElementById('provinceSelect').value,
+            schoolName: selectedSchoolInput.value,
+            schoolSearch: schoolSearchInput.value,
+            email: document.getElementById('emailInput').value.trim(),
+            phone: document.getElementById('phoneInput').value.trim()
+        };
+        localStorage.setItem(storageKey, JSON.stringify(data));
+    }
+
+    function loadSavedData() {
+        const saved = localStorage.getItem(storageKey);
+        if (!saved) return;
+
+        try {
+            const data = JSON.parse(saved);
+            document.getElementById('fullName').value = data.fullName || '';
+            document.getElementById('roleSelect').value = data.role || '';
+            document.getElementById('provinceSelect').value = data.province || 'GAUTENG';
+            selectedSchoolInput.value = data.schoolName || '';
+            schoolSearchInput.value = data.schoolSearch || data.schoolName || '';
+            document.getElementById('emailInput').value = data.email || '';
+            document.getElementById('phoneInput').value = data.phone || '';
+
+            if (data.schoolName) {
+                schoolSelect.style.display = 'none';
+            }
+        } catch (error) {
+            console.log('Unable to load saved profile data', error);
+        }
+    }
+
+    function clearSchoolSearch() {
+        schoolSearchInput.value = '';
+        schoolSelect.value = '';
+        schoolSelect.style.display = 'none';
+        selectedSchoolInput.value = '';
+        const noResultMsg = document.getElementById('noResultMsg');
+        if (noResultMsg) noResultMsg.style.display = 'none';
+        saveFormData();
+    }
+
+    function filterSchools() {
+        const query = schoolSearchInput.value.trim().toLowerCase();
+        const noResultMsg = document.getElementById('noResultMsg');
+        let matchFound = false;
+
+        if (!query) {
+            clearSchoolSearch();
+            return;
+        }
+
+        schoolSelect.style.display = 'none';
+
+        Array.from(schoolSelect.options).forEach((option) => {
+            if (option.value === '') {
+                option.hidden = true;
+                return;
+            }
+
+            const text = option.text.toLowerCase();
+            const shouldShow = text.includes(query);
+            option.hidden = !shouldShow;
+
+            if (shouldShow && !matchFound) {
+                schoolSelect.value = option.value;
+                selectedSchoolInput.value = option.text;
+                matchFound = true;
+            }
+        });
+
+        if (!matchFound) {
+            schoolSelect.value = '';
+            selectedSchoolInput.value = '';
+            noResultMsg.style.display = 'block';
+            schoolSelect.style.display = 'none';
+        } else {
+            schoolSelect.style.display = 'block';
+            noResultMsg.style.display = 'none';
+        }
+
+        saveFormData();
+    }
+
+    schoolSelect.addEventListener('change', () => {
+        const selectedSchoolName = schoolSelect.value ? schoolSelect.options[schoolSelect.selectedIndex].text : '';
+        selectedSchoolInput.value = selectedSchoolName;
+        schoolSearchInput.value = selectedSchoolName;
+        schoolSelect.style.display = 'none';
+        saveFormData();
+    });
+
+    form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        saveFormData();
+        window.location.href = 'profile-success.html';
+    });
+
+    ['input', 'change'].forEach((eventType) => {
+        form.addEventListener(eventType, saveFormData);
+    });
+
+    searchSchoolBtn.addEventListener('click', filterSchools);
+    schoolSearchInput.addEventListener('input', () => {
+        if (schoolSearchInput.value.trim() === '') {
+            clearSchoolSearch();
+        } else {
+            filterSchools();
+        }
+    });
+    schoolSearchInput.addEventListener('search', clearSchoolSearch);
+    schoolSearchInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            filterSchools();
+        }
+    });
+
+    loadSavedData();
+</script>
+</body>
+</html>
