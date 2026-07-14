@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>School Community Feed</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
+body{
+    background:linear-gradient(135deg,#f3f7ff 0%, #eef4fb 100%);
+    color:#173b5e;
+    min-height:100vh;
+    padding:24px;
+    overflow-x:hidden;
+    transition:background 0.3s ease, color 0.3s ease;
+}
+body.dark-mode{
+    background:linear-gradient(135deg,#0d1a2b 0%, #091420 100%);
+    color:#c8d8e8;
+}
+body.dark-mode .header-card,
+body.dark-mode .composer-card,
+body.dark-mode .post-card,
+body.dark-mode .drawer-card,
+body.dark-mode .about-card{
+    background:#132436;
+    border-color:rgba(200,216,232,0.12);
+    color:#c8d8e8;
+}
+body.dark-mode .brand h1,
+body.dark-mode .post-card .post-content,
+body.dark-mode .drawer-card .drawer-section-title,
+body.dark-mode .drawer-card .drawer-item span{
+    color:#c8d8e8;
+}
+body.dark-mode textarea,
+body.dark-mode input[type="text"]{
+    background:#1a2e44;
+    border-color:rgba(200,216,232,0.2);
+    color:#c8d8e8;
+}
+body.dark-mode .post-time,
+body.dark-mode .empty{
+    color:#7a9dba;
+}
+body.dark-mode .view-students-btn{
+    box-shadow:0 6px 14px rgba(0,0,0,0.3);
+}
+body.dark-mode .badge{
+    background:linear-gradient(135deg,#1e4a76,#2a6fa8);
+}
+body.dark-mode .drawer-divider{
+    border-color:rgba(200,216,232,0.12);
+}
+body.dark-mode .drawer-item:hover{
+    background:rgba(200,216,232,0.08);
+}
+body.dark-mode .drawer-item .icon{
+    background:rgba(200,216,232,0.1);
+}
+body.dark-mode .drawer-avatar{
+    background:linear-gradient(135deg,#1e4a76,#2a6fa8);
+}
+body.dark-mode .drawer-card .drawer-name{
+    color:#c8d8e8;
+}
+body.dark-mode .drawer-card .drawer-meta{
+    color:#7a9dba;
+}
+body.dark-mode .drawer-backdrop{
+    background:rgba(0,0,0,0.6);
+}
+body.dark-mode button.secondary{
+    background:#1a2e44;
+    color:#c8d8e8;
+    border-color:rgba(200,216,232,0.15);
+}
+body.dark-mode button.secondary:hover{
+    background:#1e3a52;
+}
+body.dark-mode .about-card p{
+    color:#9bb3cc;
+}
+body.dark-mode .about-card .about-label{
+    color:#7a9dba;
+}
+
+.container{max-width:860px;margin:0 auto;display:grid;gap:18px;}
+.header-card,
+.composer-card,
+.post-card,
+.drawer-card,
+.about-card{background:#fff;border-radius:20px;box-shadow:0 12px 30px rgba(13,41,68,0.10);border:1px solid rgba(23,59,94,0.08);transition:background 0.3s ease, border-color 0.3s ease;} 
+.header-card{padding:18px 20px;display:flex;justify-content:space-between;align-items:center;gap:14px;}
+.brand{display:flex;align-items:center;gap:12px;}
+.brand h1{font-size:24px;margin-bottom:4px;color:#173b5e;font-weight:700;}
+.badge{background:linear-gradient(135deg,#173b5e,#3a79b8);color:#fff;padding:8px 12px;border-radius:999px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;}
+.composer-card{padding:18px 20px;display:grid;gap:12px;}
+.composer-top{display:flex;align-items:center;gap:12px;}
+.avatar{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#173b5e,#3a79b8);color:#fff;font-weight:700;}
+textarea,input[type="text"]{width:100%;border:1px solid rgba(23,59,94,0.16);border-radius:14px;padding:12px 14px;font-size:15px;color:#173b5e;outline:none;background:#fbfdff;}
+textarea{min-height:92px;resize:vertical;}
+.input-row{display:flex;gap:10px;flex-wrap:wrap;}
+.input-row input[type="text"]{flex:1;min-width:200px;}
+input[type="file"]{display:none;}
+.photo-picker{display:flex;align-items:center;gap:10px;flex:1;min-width:240px;}
+.photo-picker input[type="text"]{flex:1;}
+.photo-picker button{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;padding:0;font-size:22px;line-height:1;box-shadow:0 8px 18px rgba(13,41,68,0.16);} 
+.btn-row{display:flex;justify-content:flex-end;gap:10px;}
+button{border:none;border-radius:12px;padding:11px 16px;font-weight:700;cursor:pointer;background:#173b5e;color:#fff;box-shadow:0 8px 16px rgba(13,41,68,0.14);font-family:Georgia, 'Times New Roman', Times, serif;} 
+button:hover{background:#0f2a45;}
+button.secondary{background:#f4f7fb;color:#173b5e;box-shadow:none;border:1px solid rgba(23,59,94,0.1);} 
+button.secondary:hover{background:#eaf2fa;}
+.post-card{padding:16px 18px;display:grid;gap:12px;}
+.post-head{display:flex;justify-content:space-between;align-items:center;gap:10px;}
+.post-author{display:flex;align-items:center;gap:12px;}
+.author-avatar{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#ff8a65,#ff5e62);color:#fff;font-weight:700;}
+.post-time{font-size:12px;color:#90a2b4;}
+.post-content{color:#314a62;line-height:1.65;font-size:15px;}
+.post-image{border-radius:16px;overflow:hidden;background:#f7fbff;border:1px solid rgba(23,59,94,0.1);}
+.post-image img{width:100%;max-height:420px;object-fit:cover;display:block;}
+.post-actions{display:flex;gap:10px;flex-wrap:wrap;}
+.post-actions button{padding:8px 12px;font-size:13px;background:#f4f7fb;color:#173b5e;box-shadow:none;border:1px solid rgba(23,59,94,0.08);} 
+.post-actions button:hover{background:#eaf2fa;} 
+.post-actions button.danger{background:#fff1f1;color:#b42318;border:1px solid rgba(180,35,24,0.16);} 
+.post-actions button.danger:hover{background:#ffe8e8;} 
+.empty{padding:20px;text-align:center;color:#5d6f80;border-radius:16px;border:1px dashed rgba(23,59,94,0.2);background:#fcfeff;}
+
+/* ===== STUDENT LIST MODAL ===== */
+.students-overlay{position:fixed;inset:0;background:rgba(7,18,32,0.55);display:none;align-items:center;justify-content:center;padding:20px;z-index:2000;backdrop-filter:blur(2px);}
+.students-overlay.active{display:flex;}
+.students-modal{background:#fff;border-radius:22px;width:min(520px,100%);max-height:85vh;display:flex;flex-direction:column;box-shadow:0 20px 50px rgba(7,18,32,0.3);overflow:hidden;animation:modalIn 0.2s ease;}
+body.dark-mode .students-modal{background:#132436;}
+body.dark-mode .students-modal-header{background:linear-gradient(135deg,#1e4a76,#2a6fa8);}
+body.dark-mode .student-item{background:#1a2e44;border-color:rgba(200,216,232,0.1);}
+body.dark-mode .student-item:hover{background:#1e3a52;}
+body.dark-mode .student-name{color:#c8d8e8;}
+body.dark-mode .student-info,
+body.dark-mode .student-phone{color:#7a9dba;}
+body.dark-mode .detail-modal{background:#132436;}
+body.dark-mode .detail-header{background:linear-gradient(135deg,#1e4a76,#2a6fa8);}
+body.dark-mode .detail-body .detail-field{background:rgba(200,216,232,0.06);border-color:rgba(200,216,232,0.1);}
+body.dark-mode .detail-body label{color:#7a9dba;}
+body.dark-mode .detail-body .value{color:#c8d8e8;}
+body.dark-mode .detail-name h3{color:#c8d8e8;}
+body.dark-mode .detail-name .detail-role{color:#7a9dba;}
+body.dark-mode .no-students-msg .icon{opacity:0.7;}
+body.dark-mode .no-students-msg{color:#7a9dba;}
+@keyframes modalIn{from{opacity:0;transform:translateY(20px) scale(0.96);}to{opacity:1;transform:translateY(0) scale(1);}}
+.students-modal-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid rgba(23,59,94,0.1);background:linear-gradient(135deg,#173b5e,#3a79b8);color:#fff;flex-shrink:0;}
+.students-modal-header h2{font-size:17px;font-weight:700;}
+.students-modal-close{width:34px;height:34px;border-radius:50%;border:none;background:rgba(255,255,255,0.15);color:#fff;font-size:18px;cursor:pointer;display:grid;place-items:center;}
+.students-modal-close:hover{background:rgba(255,255,255,0.25);}
+.students-list{flex:1;overflow-y:auto;padding:12px 16px;display:grid;gap:8px;}
+.student-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;background:#f7fbff;border:1px solid rgba(23,59,94,0.08);cursor:pointer;transition:background 0.15s;}
+.student-item:hover{background:#eef6ff;}
+.student-item:active{background:#dceeff;}
+.student-avatar{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#43a047,#66bb6a);color:#fff;font-weight:700;flex-shrink:0;font-size:18px;}
+.student-meta{flex:1;min-width:0;}
+.student-name{font-size:14px;font-weight:700;color:#173b5e;}
+.student-info{font-size:12px;color:#5d6f80;margin-top:2px;}
+.student-phone{font-size:12px;color:#5d6f80;}
+
+/* ===== STUDENT DETAIL OVERLAY ===== */
+.detail-overlay{position:fixed;inset:0;background:rgba(7,18,32,0.55);display:none;align-items:center;justify-content:center;padding:20px;z-index:2200;backdrop-filter:blur(2px);}
+.detail-overlay.active{display:flex;}
+.detail-modal{background:#fff;border-radius:22px;width:min(480px,100%);max-height:85vh;overflow-y:auto;box-shadow:0 20px 50px rgba(7,18,32,0.3);animation:modalIn 0.2s ease;}
+.detail-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid rgba(23,59,94,0.1);background:linear-gradient(135deg,#173b5e,#3a79b8);color:#fff;position:sticky;top:0;z-index:1;}
+.detail-header h2{font-size:17px;font-weight:700;}
+.detail-close{width:34px;height:34px;border-radius:50%;border:none;background:rgba(255,255,255,0.15);color:#fff;font-size:18px;cursor:pointer;display:grid;place-items:center;}
+.detail-close:hover{background:rgba(255,255,255,0.25);}
+.detail-body{padding:20px;}
+.detail-avatar-row{display:flex;align-items:center;gap:14px;margin-bottom:20px;}
+.detail-avatar{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#43a047,#66bb6a);color:#fff;font-weight:700;font-size:28px;flex-shrink:0;}
+.detail-name h3{font-size:20px;color:#173b5e;margin:0;}
+.detail-name .detail-role{font-size:13px;color:#5d6f80;margin-top:2px;}
+.detail-grid{display:grid;gap:12px;}
+.detail-field{padding:12px 14px;border-radius:12px;background:rgba(23,59,94,0.06);border:1px solid rgba(23,59,94,0.08);}
+.detail-field label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#5d6f80;margin-bottom:3px;font-weight:600;}
+.detail-field .value{font-size:15px;color:#173b5e;font-weight:600;word-break:break-all;}
+.detail-field .value.sa-phone{font-family:'Courier New', monospace;letter-spacing:0.05em;}
+.no-students-msg{text-align:center;padding:30px 20px;color:#5d6f80;font-size:14px;}
+.no-students-msg .icon{font-size:48px;margin-bottom:10px;display:block;}
+
+/* ===== VIEW STUDENTS BUTTON ===== */
+.view-students-btn{background:linear-gradient(135deg,#43a047,#66bb6a);color:#fff;padding:8px 14px;border-radius:999px;font-size:12px;font-weight:700;border:none;cursor:pointer;white-space:nowrap;font-family:Georgia, 'Times New Roman', Times, serif;box-shadow:0 6px 14px rgba(67,160,71,0.2);}
+.view-students-btn:hover{background:linear-gradient(135deg,#2e7d32,#43a047);}
+
+/* ===== HAMBURGER / DRAWER TOGGLE ===== */
+.hamburger-btn{
+    width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:rgba(23,59,94,0.1);color:#173b5e;font-size:22px;border:none;cursor:pointer;flex-shrink:0;transition:background 0.2s;
+}
+body.dark-mode .hamburger-btn{background:rgba(200,216,232,0.1);color:#c8d8e8;}
+.hamburger-btn:hover{background:rgba(23,59,94,0.18);}
+body.dark-mode .hamburger-btn:hover{background:rgba(200,216,232,0.18);}
+
+/* ===== DRAWER OVERLAY ===== */
+.drawer-backdrop{
+    position:fixed;inset:0;background:rgba(7,18,32,0.4);z-index:3000;display:none;backdrop-filter:blur(3px);
+}
+.drawer-backdrop.active{display:block;}
+
+/* ===== DRAWER PANEL ===== */
+.drawer-panel{
+    position:fixed;top:0;left:-320px;width:300px;height:100vh;background:#fff;z-index:3001;box-shadow:4px 0 30px rgba(7,18,32,0.2);transition:left 0.3s ease;overflow-y:auto;display:flex;flex-direction:column;
+}
+body.dark-mode .drawer-panel{background:#132436;}
+.drawer-panel.open{left:0;}
+
+.drawer-card{
+    border-radius:0;box-shadow:none;border:none;border-bottom:1px solid rgba(23,59,94,0.08);padding:20px;flex-shrink:0;
+}
+.drawer-avatar{
+    width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#173b5e,#3a79b8);color:#fff;font-weight:700;font-size:28px;margin-bottom:12px;
+}
+.drawer-name{
+    font-size:20px;font-weight:700;color:#173b5e;margin-bottom:4px;
+}
+.drawer-meta{
+    font-size:13px;color:#5d6f80;
+}
+
+.drawer-divider{
+    height:1px;background:rgba(23,59,94,0.08);margin:0 20px;
+}
+
+.drawer-section{
+    padding:8px 0;flex:1;
+}
+.drawer-section-title{
+    font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:#5d6f80;font-weight:700;padding:8px 20px 4px;
+}
+.drawer-item{
+    display:flex;align-items:center;gap:14px;padding:12px 20px;cursor:pointer;transition:background 0.15s;border:none;background:transparent;width:100%;text-align:left;font-size:15px;color:#173b5e;font-weight:500;font-family:inherit;box-shadow:none;
+}
+body.dark-mode .drawer-item{color:#c8d8e8;}
+.drawer-item:hover{background:rgba(23,59,94,0.06);}
+body.dark-mode .drawer-item:hover{background:rgba(200,216,232,0.08);}
+.drawer-item .icon{
+    width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:rgba(23,59,94,0.08);font-size:16px;flex-shrink:0;
+}
+body.dark-mode .drawer-item .icon{background:rgba(200,216,232,0.1);}
+.drawer-item span{flex:1;}
+.drawer-item .toggle-switch{
+    width:44px;height:24px;border-radius:12px;background:#ccc;position:relative;transition:background 0.25s;flex-shrink:0;cursor:pointer;
+}
+body.dark-mode .drawer-item .toggle-switch{background:#3a5a7a;}
+.drawer-item .toggle-switch.active{background:#173b5e;}
+body.dark-mode .drawer-item .toggle-switch.active{background:#2a6fa8;}
+.drawer-item .toggle-switch::after{
+    content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.25s;box-shadow:0 1px 3px rgba(0,0,0,0.2);
+}
+.drawer-item .toggle-switch.active::after{left:22px;}
+
+.drawer-close-btn{
+    position:absolute;top:12px;right:12px;width:34px;height:34px;border-radius:50%;border:none;background:rgba(23,59,94,0.1);color:#173b5e;font-size:18px;cursor:pointer;display:grid;place-items:center;z-index:5;
+}
+body.dark-mode .drawer-close-btn{background:rgba(200,216,232,0.1);color:#c8d8e8;}
+
+/* ===== ABOUT CARD (shown in main content area) ===== */
+.about-card{display:none;padding:24px;}
+.about-card.active{display:grid;gap:16px;}
+.about-card h2{font-size:20px;color:#173b5e;margin-bottom:8px;}
+body.dark-mode .about-card h2{color:#c8d8e8;}
+.about-card p{font-size:15px;line-height:1.7;color:#314a62;}
+.about-card .about-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#5d6f80;margin-bottom:4px;}
+
+@media (max-width: 640px){
+    body{padding:14px;}
+    .container{gap:14px;}
+    .header-card{flex-direction:column;align-items:flex-start;}
+    .brand h1{font-size:20px;}
+    .badge{font-size:10px;padding:6px 10px;white-space:normal;word-break:break-word;}
+    .composer-card,.post-card{padding:16px;}
+    .photo-picker{flex-direction:column;align-items:stretch;}
+    .photo-picker button{width:100%;height:46px;border-radius:12px;}
+    .btn-row{flex-direction:column-reverse;}
+    .btn-row button{width:100%;min-height:48px;}
+    .post-head{flex-direction:column;align-items:flex-start;}
+    .post-actions{flex-direction:column;}
+    .post-actions button{width:100%;min-height:44px;justify-content:center;display:flex;align-items:center;}
+    textarea,input[type="text"]{font-size:16px;}
+    .avatar{width:42px;height:42px;font-size:16px;}
+    .post-image img{max-height:280px;}
+    .students-modal{width:100%;max-height:90vh;border-radius:18px;}
+    .detail-modal{width:100%;max-height:90vh;border-radius:18px;}
+    .students-modal-header{padding:14px 16px;}
+    .students-list{padding:10px 12px;}
+    .student-item{padding:10px 12px;}
+    .student-avatar{width:40px;height:40px;font-size:16px;}
+    .detail-body{padding:16px;}
+    .detail-avatar{width:54px;height:54px;font-size:24px;}
+    .detail-name h3{font-size:18px;}
+    .drawer-panel{width:280px;}
+    .hamburger-btn{width:40px;height:40px;font-size:18px;}
+}
+@media (max-width: 400px){
+    body{padding:10px;}
+    .container{gap:10px;}
+    .header-card{padding:14px 16px;}
+    .brand h1{font-size:18px;}
+    .composer-card,.post-card{padding:12px 14px;}
+    .badge{font-size:10px;padding:6px 10px;white-space:normal;word-break:break-word;}
+    .composer-top{gap:10px;}
+    textarea{min-height:72px;padding:10px 12px;font-size:15px;}
+    .post-content{font-size:14px;}
+    .post-head{gap:6px;}
+    .author-avatar{width:38px;height:38px;font-size:14px;}
+    button{padding:10px 14px;font-size:13px;}
+    input[type="text"]{padding:10px 12px;font-size:15px;}
+    .view-students-btn{font-size:11px;padding:6px 12px;}
+    .students-modal-header h2{font-size:15px;}
+    .detail-header h2{font-size:15px;}
+    .detail-field .value{font-size:14px;}
+    .drawer-panel{width:260px;}
+    .drawer-name{font-size:18px;}
+    .drawer-avatar{width:54px;height:54px;font-size:24px;}
+    .drawer-item{padding:10px 16px;font-size:14px;}
+    .hamburger-btn{width:38px;height:38px;font-size:16px;}
+}
+@media (max-width: 360px){
+    body{padding:8px;}
+    .container{gap:8px;}
+    .header-card{padding:12px 14px;border-radius:16px;}
+    .brand h1{font-size:17px;}
+    .composer-card,.post-card{padding:10px 12px;border-radius:16px;}
+    textarea{min-height:64px;font-size:14px;padding:8px 10px;}
+    .post-content{font-size:13px;line-height:1.55;}
+    .btn-row button{font-size:13px;padding:10px 12px;min-height:44px;}
+    .post-actions button{font-size:12px;padding:8px 10px;}
+    .post-image img{max-height:220px;}
+    .avatar{width:36px;height:36px;font-size:14px;}
+    .drawer-panel{width:240px;}
+    .drawer-name{font-size:16px;}
+    .drawer-avatar{width:48px;height:48px;font-size:22px;}
+    .drawer-item{padding:8px 14px;font-size:13px;gap:10px;}
+    .drawer-item .icon{width:30px;height:30px;font-size:14px;}
+    .drawer-section-title{font-size:10px;padding:6px 14px 4px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== DRAWER BACKDROP ===== -->
+<div class="drawer-backdrop" id="drawerBackdrop"></div>
+
+<!-- ===== DRAWER PANEL ===== -->
+<div class="drawer-panel" id="drawerPanel">
+    <button class="drawer-close-btn" id="drawerCloseBtn">✕</button>
+    <div class="drawer-card">
+        <div class="drawer-avatar" id="drawerAvatar">U</div>
+        <div class="drawer-name" id="drawerName">User</div>
+        <div class="drawer-meta" id="drawerRole">Loading role...</div>
+        <div class="drawer-meta" id="drawerSchool" style="margin-top:4px;"></div>
+    </div>
+
+    <div class="drawer-divider"></div>
+
+<div class="drawer-section">
+        <div class="drawer-section-title">Account</div>
+        <button class="drawer-item" id="drawerEditProfile">
+            <span class="icon">👤</span>
+            <span>Edit Profile</span>
+        </button>
+        <button class="drawer-item" id="drawerAbout" style="display:none;">
+            <span class="icon">ℹ️</span>
+            <span>About</span>
+        </button>
+    </div>
+
+    <div class="drawer-divider"></div>
+
+    <div class="drawer-section">
+        <div class="drawer-section-title">Preferences</div>
+        <div class="drawer-item" id="drawerDarkMode">
+            <span class="icon">🌙</span>
+            <span>Dark Mode</span>
+            <div class="toggle-switch" id="darkModeToggle"></div>
+        </div>
+    </div>
+
+    <div class="drawer-divider"></div>
+
+    <div class="drawer-section">
+        <button class="drawer-item" id="drawerLogout" style="color:#b42318;">
+            <span class="icon" style="background:rgba(180,35,24,0.12);">🚪</span>
+            <span>Log Out</span>
+        </button>
+    </div>
+</div>
+
+<div class="container">
+    <div class="header-card">
+        <div class="brand">
+            <button class="hamburger-btn" id="hamburgerBtn" aria-label="Open menu">☰</button>
+            <h1>School Community Feed</h1>
+        </div>
+<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+<div class="badge" id="roleBadge" style="cursor:pointer;">Loading role...</div>
+            <a href="inbox.html" id="messageTrigger" style="width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:#dceeff;color:#173b5e;box-shadow:0 6px 14px rgba(13,41,68,0.12);font-size:18px;border:none;cursor:pointer;text-decoration:none;">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 8a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H8l-3 3V8z"></path>
+                </svg>
+            </a>
+        </div>
+    </div>
+
+    <!-- ===== FEED VIEW ===== -->
+    <div id="feedContent">
+        <div class="composer-card" id="composerCard">
+            <div class="composer-top">
+                <div class="avatar">A</div>
+                <div>
+                    <strong>Administrator</strong>
+                    <div class="post-time">Create a new post</div>
+                </div>
+            </div>
+            <textarea id="postText" placeholder="Write a status update, announcement, or statement..."></textarea>
+            <div class="input-row">
+                <div class="photo-picker">
+                    <input type="text" id="imageUrl" placeholder="Insert photo (optional)">
+                    <button type="button" id="pickPhotoBtn" aria-label="Choose image file">+</button>
+                    <input type="file" id="imageFile" accept="image/*">
+                </div>
+            </div>
+            <div class="btn-row">
+                <button type="button" class="secondary" id="clearBtn">Clear</button>
+                <button type="button" id="publishBtn">Publish Post</button>
+            </div>
+        </div>
+        <div id="feed"></div>
+    </div>
+
+    <!-- ===== ABOUT CARD ===== -->
+    <div class="about-card" id="aboutCard">
+        <h2>About School Community Feed</h2>
+        <div class="about-label">Our Mission</div>
+        <p>School Community Feed is a platform designed to connect students, teachers, parents, and administrators within South African schools. Our goal is to foster communication, share updates, and build a stronger school community.</p>
+        <div class="about-label" style="margin-top:12px;">Features</div>
+        <p>• Create and share posts with your school community<br>
+        • View registered learners and their profiles<br>
+        • Send direct messages to teachers and other members<br>
+        • Connect with your school's network<br>
+        • Customize your experience with dark mode</p>
+        <div class="about-label" style="margin-top:12px;">Privacy</div>
+        <p>Your profile information is stored locally and only shared within your registered school network. We prioritize your privacy and data security.</p>
+        <div class="about-label" style="margin-top:12px;">Version</div>
+        <p>School Community Feed v1.0.0</p>
+        <button class="secondary" id="backToFeedBtn" style="margin-top:4px;">← Back to Feed</button>
+    </div>
+</div>
+
+<!-- ===== STUDENT LIST MODAL ===== -->
+<div class="students-overlay" id="studentsOverlay">
+    <div class="students-modal">
+        <div class="students-modal-header">
+            <h2 id="studentsModalTitle">Registered Learners</h2>
+            <button type="button" class="students-modal-close" id="studentsModalClose">✕</button>
+        </div>
+        <div class="students-list" id="studentsList">
+            <div class="no-students-msg">
+                <span class="icon">📚</span>
+                No learners registered yet.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== STUDENT DETAIL MODAL ===== -->
+<div class="detail-overlay" id="detailOverlay">
+    <div class="detail-modal">
+        <div class="detail-header">
+            <h2 id="detailTitle">Learner Profile</h2>
+            <button type="button" class="detail-close" id="detailClose">✕</button>
+        </div>
+        <div class="detail-body" id="detailBody">
+            <!-- Dynamically populated -->
+        </div>
+    </div>
+</div>
+
+<script>
+const storageKey = 'schoolAdminFeed';
+const storageFlag = 'schoolAdminFeedCleared';
+const profileStorageKey = 'schoolProfileData';
+const usersRegistryKey = 'schoolUsersRegistry';
+const savedProfile = JSON.parse(localStorage.getItem(profileStorageKey) || '{}');
+const selectedRole = (savedProfile.role || '').toString().trim().toLowerCase();
+const currentSchool = (savedProfile.schoolName || savedProfile.schoolSearch || '').toString().trim();
+const currentSchoolDisplay = currentSchool || 'School';
+const userFullName = savedProfile.fullName || 'User';
+const userEmail = savedProfile.email || '';
+const roleBadge = document.getElementById('roleBadge');
+
+const feed = document.getElementById('feed');
+const composerCard = document.getElementById('composerCard');
+const postText = document.getElementById('postText');
+const imageUrl = document.getElementById('imageUrl');
+const imageFile = document.getElementById('imageFile');
+const publishBtn = document.getElementById('publishBtn');
+const clearBtn = document.getElementById('clearBtn');
+const pickPhotoBtn = document.getElementById('pickPhotoBtn');
+const messageTrigger = document.getElementById('messageTrigger');
+const viewStudentsBtn = document.getElementById('viewStudentsBtn');
+const studentsOverlay = document.getElementById('studentsOverlay');
+const studentsModalClose = document.getElementById('studentsModalClose');
+const studentsList = document.getElementById('studentsList');
+const studentsModalTitle = document.getElementById('studentsModalTitle');
+const detailOverlay = document.getElementById('detailOverlay');
+const detailClose = document.getElementById('detailClose');
+const detailBody = document.getElementById('detailBody');
+const detailTitle = document.getElementById('detailTitle');
+
+// Drawer elements
+const drawerBackdrop = document.getElementById('drawerBackdrop');
+const drawerPanel = document.getElementById('drawerPanel');
+const hamburgerBtn = document.getElementById('hamburgerBtn');
+const drawerCloseBtn = document.getElementById('drawerCloseBtn');
+const drawerAvatar = document.getElementById('drawerAvatar');
+const drawerName = document.getElementById('drawerName');
+const drawerRole = document.getElementById('drawerRole');
+const drawerSchool = document.getElementById('drawerSchool');
+const drawerEditProfile = document.getElementById('drawerEditProfile');
+const drawerAbout = document.getElementById('drawerAbout');
+const drawerDarkMode = document.getElementById('drawerDarkMode');
+const darkModeToggle = document.getElementById('darkModeToggle');
+const drawerLogout = document.getElementById('drawerLogout');
+const aboutCard = document.getElementById('aboutCard');
+const backToFeedBtn = document.getElementById('backToFeedBtn');
+const feedContent = document.getElementById('feedContent');
+
+const isAdmin = selectedRole === 'administrator' || selectedRole === 'admin';
+
+// ============================================================
+// DRAWER FUNCTIONS
+// ============================================================
+function openDrawer() {
+    drawerPanel.classList.add('open');
+    drawerBackdrop.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeDrawer() {
+    drawerPanel.classList.remove('open');
+    drawerBackdrop.classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+hamburgerBtn.addEventListener('click', openDrawer);
+drawerCloseBtn.addEventListener('click', closeDrawer);
+drawerBackdrop.addEventListener('click', closeDrawer);
+
+// ============================================================
+// SET BADGE TEXT
+// ============================================================
+function setBadgeText() {
+    if (isAdmin && currentSchool) {
+        roleBadge.textContent = `${currentSchool} Learners`;
+    } else if (isAdmin) {
+        roleBadge.textContent = 'School Learners';
+    } else {
+        const displayRole = selectedRole ? selectedRole.replace(/\b\w/g, (char) => char.toUpperCase()) : 'Role not set';
+        roleBadge.textContent = `You are a ${displayRole}`;
+    }
+}
+
+// ============================================================
+// UPDATE DRAWER INFO
+// ============================================================
+function updateDrawerInfo() {
+    const initial = (userFullName || 'U').charAt(0).toUpperCase();
+    drawerAvatar.textContent = initial;
+    drawerName.textContent = userFullName || 'User';
+    
+    const displayRole = selectedRole ? selectedRole.replace(/\b\w/g, (char) => char.toUpperCase()) : 'Not set';
+    drawerRole.textContent = `Role: ${displayRole}`;
+    
+    if (userEmail) {
+        drawerRole.textContent += ` • ${userEmail}`;
+    }
+    
+    if (selectedRole === 'student' && savedProfile.grade) {
+        drawerSchool.textContent = `Grade: ${savedProfile.grade} • ${currentSchoolDisplay}`;
+    } else if (selectedRole === 'parent' && savedProfile.children && savedProfile.children.length > 0) {
+        const childrenList = Array.isArray(savedProfile.children) ? savedProfile.children.join(', ') : '';
+        drawerSchool.textContent = `Children: ${childrenList} • ${currentSchoolDisplay}`;
+    } else {
+        drawerSchool.textContent = currentSchoolDisplay || '';
+    }
+}
+
+// ============================================================
+// DARK MODE
+// ============================================================
+function loadDarkMode() {
+    const darkMode = localStorage.getItem('schoolDarkMode') === 'true';
+    if (darkMode) {
+        document.body.classList.add('dark-mode');
+        darkModeToggle.classList.add('active');
+    } else {
+        document.body.classList.remove('dark-mode');
+        darkModeToggle.classList.remove('active');
+    }
+}
+
+function toggleDarkMode() {
+    const isDark = document.body.classList.toggle('dark-mode');
+    darkModeToggle.classList.toggle('active', isDark);
+    localStorage.setItem('schoolDarkMode', isDark);
+}
+
+darkModeToggle.addEventListener('click', toggleDarkMode);
+drawerDarkMode.addEventListener('click', function(e) {
+    if (e.target !== darkModeToggle) {
+        toggleDarkMode();
+    }
+});
+
+// ============================================================
+// EDIT PROFILE
+// ============================================================
+drawerEditProfile.addEventListener('click', function() {
+    window.location.href = 'edit-profile.html';
+});
+
+// ============================================================
+// LOG OUT
+// ============================================================
+drawerLogout.addEventListener('click', function() {
+    if (confirm('Are you sure you want to log out? Your profile data will remain saved.')) {
+        localStorage.removeItem(profileStorageKey);
+        window.location.href = 'index.html';
+    }
+});
+
+// ============================================================
+// ABOUT / BACK TO FEED
+// ============================================================
+drawerAbout.addEventListener('click', function() {
+    closeDrawer();
+    feedContent.style.display = 'none';
+    aboutCard.classList.add('active');
+});
+
+backToFeedBtn.addEventListener('click', function() {
+    feedContent.style.display = 'block';
+    aboutCard.classList.remove('active');
+});
+
+// ============================================================
+// FEED STORAGE
+// ============================================================
+function initializeFeedStorage(){
+    if (!localStorage.getItem(storageFlag)) {
+        localStorage.removeItem(storageKey);
+        localStorage.setItem(storageFlag, '1');
+    }
+}
+
+function defaultPosts(){
+    return [];
+}
+
+function readPosts(){
+    try {
+        const saved = localStorage.getItem(storageKey);
+        if (!saved) return defaultPosts();
+        const parsed = JSON.parse(saved);
+        return Array.isArray(parsed) ? parsed : defaultPosts();
+    } catch (error) {
+        console.log('Could not read feed data', error);
+        return defaultPosts();
+    }
+}
+
+function savePosts(posts){
+    localStorage.setItem(storageKey, JSON.stringify(posts));
+}
+
+function renderFeed(){
+    const allPosts = readPosts();
+    const normalizedCurrentSchool = currentSchool.toLowerCase();
+    const posts = allPosts.filter(post => {
+        const postSchool = (post.schoolName || '').toString().trim().toLowerCase();
+        if (!postSchool) return true;
+        if (!normalizedCurrentSchool) return false;
+        return postSchool === normalizedCurrentSchool;
+    });
+
+    if (!posts.length) {
+        feed.innerHTML = '<div class="empty">No posts yet.</div>';
+        return;
+    }
+
+    feed.innerHTML = posts.map(post => `
+        <div class="post-card">
+            <div class="post-head">
+                <div class="post-author">
+                    <div class="author-avatar">${post.author.charAt(0)}</div>
+                    <div>
+                        <div><strong>${post.author}</strong></div>
+                        <div class="post-time">${post.role} • ${post.time}</div>
+                    </div>
+                </div>
+                <div class="post-time">${post.time}</div>
+            </div>
+            ${post.text ? `<div class="post-content">${post.text}</div>` : ''}
+            ${post.image ? `<div class="post-image"><img src="${post.image}" alt="Post image"></div>` : ''}
+            <div class="post-actions">
+                <button type="button">👍 Like</button>
+                <button type="button">🔗 Share</button>
+                <button type="button" class="danger" onclick="deletePost('${post.id}')">🗑 Delete</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function deletePost(postId){
+    const posts = readPosts().filter(post => post.id !== postId);
+    savePosts(posts);
+    renderFeed();
+}
+
+function createPostFromInput(){
+    if (!isAdmin) {
+        alert('Only administrators can publish posts.');
+        return;
+    }
+
+    const text = postText.value.trim();
+    if (!text && !imageUrl.value.trim() && !imageFile.files[0]) {
+        alert('Please add a statement, image, or both.');
+        return;
+    }
+
+    const posts = readPosts();
+    const file = imageFile.files[0];
+    const newPost = {
+        id: Date.now().toString(),
+        author: 'Administrator',
+        role: 'School Admin',
+        time: 'Just now',
+        text: text,
+        image: '',
+        schoolName: currentSchool
+    };
+
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e){
+            newPost.image = e.target.result;
+            posts.unshift(newPost);
+            savePosts(posts);
+            renderFeed();
+            resetComposer();
+        };
+        reader.readAsDataURL(file);
+    } else {
+        newPost.image = imageUrl.value.trim();
+        posts.unshift(newPost);
+        savePosts(posts);
+        renderFeed();
+        resetComposer();
+    }
+}
+
+function resetComposer(){
+    postText.value='';
+    imageUrl.value='';
+    imageFile.value='';
+}
+
+// ============================================================
+// GET REGISTERED STUDENTS
+// ============================================================
+function getStudents() {
+    let registry = [];
+    try {
+        const saved = localStorage.getItem(usersRegistryKey);
+        registry = saved ? JSON.parse(saved) : [];
+        if (!Array.isArray(registry)) registry = [];
+    } catch (error) {
+        console.log('Unable to read users registry', error);
+        registry = [];
+    }
+
+    const normalizedSchool = currentSchool.toLowerCase().trim();
+
+    return registry.filter((user) => {
+        const role = (user.role || '').toString().trim().toLowerCase();
+        if (role !== 'student') return false;
+        const school = (user.schoolName || '').toString().trim().toLowerCase();
+        if (normalizedSchool && school && school !== normalizedSchool) return false;
+        if (!normalizedSchool && !school) return false;
+        return true;
+    });
+}
+
+// ============================================================
+// FORMAT SOUTH AFRICAN PHONE NUMBER
+// ============================================================
+function formatSaPhone(phone) {
+    if (!phone) return '—';
+    let cleaned = phone.replace(/[^\d+]/g, '');
+    if (/^0\d{9}$/.test(cleaned)) {
+        return cleaned.replace(/^(\d{3})(\d{3})(\d{4})$/, '$1 $2 $3');
+    }
+    if (/^\+27\d{9}$/.test(cleaned)) {
+        return cleaned.replace(/^(\+27)(\d{2})(\d{3})(\d{4})$/, '$1 $2 $3 $4');
+    }
+    if (/^\d{10}$/.test(cleaned)) {
+        return cleaned.replace(/^(\d{3})(\d{3})(\d{4})$/, '$1 $2 $3');
+    }
+    return phone;
+}
+
+// ============================================================
+// STUDENT LIST MODAL
+// ============================================================
+function openStudentsModal() {
+    const students = getStudents();
+    studentsModalTitle.textContent = `${currentSchoolDisplay || 'School'} Learners`;
+
+    if (!students.length) {
+        studentsList.innerHTML = `
+            <div class="no-students-msg">
+                <span class="icon">📚</span>
+                No learners registered yet.
+            </div>
+        `;
+    } else {
+        studentsList.innerHTML = students.map((student, index) => {
+            const initial = (student.fullName || 'S').charAt(0).toUpperCase();
+            const grade = student.grade || '—';
+            const phoneDisplay = formatSaPhone(student.phone);
+            return `
+                <div class="student-item" onclick="openStudentDetail(${index})">
+                    <div class="student-avatar">${initial}</div>
+                    <div class="student-meta">
+                        <div class="student-name">${student.fullName || 'Unknown'}</div>
+                        <div class="student-info">${student.schoolName || '—'} • Grade ${grade}</div>
+                        <div class="student-phone">${phoneDisplay}</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    studentsOverlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeStudentsModal() {
+    studentsOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+// ============================================================
+// STUDENT DETAIL MODAL
+// ============================================================
+function openStudentDetail(index) {
+    const students = getStudents();
+    const student = students[index];
+    if (!student) return;
+
+    detailTitle.textContent = 'Learner Profile';
+
+    const fullName = student.fullName || '—';
+    const email = student.email || '—';
+    const phone = student.phone || '—';
+    const phoneFormatted = formatSaPhone(phone);
+    const schoolName = student.schoolName || '—';
+    const province = student.province || '—';
+    const grade = student.grade || '—';
+    const role = student.role || 'Student';
+    const initial = fullName.charAt(0).toUpperCase();
+
+detailBody.innerHTML = `
+        <div class="detail-avatar-row">
+            <div class="detail-avatar">${initial}</div>
+            <div class="detail-name">
+                <h3>${fullName}</h3>
+                <div class="detail-role">${role}</div>
+            </div>
+        </div>
+        <div class="detail-grid">
+            <div class="detail-field">
+                <label>Full Name</label>
+                <div class="value">${fullName}</div>
+            </div>
+            <div class="detail-field">
+                <label>Email Address</label>
+                <div class="value">${email}</div>
+            </div>
+            <div class="detail-field">
+                <label>Phone Number</label>
+                <div class="value sa-phone">${phoneFormatted}</div>
+            </div>
+            <div class="detail-field">
+                <label>School</label>
+                <div class="value">${schoolName}</div>
+            </div>
+            <div class="detail-field">
+                <label>Province</label>
+                <div class="value">${province}</div>
+            </div>
+<div class="detail-field">
+                <label>Grade</label>
+                <div class="value">${grade}</div>
+            </div>
+        </div>
+    `;
+
+    closeStudentsModal();
+    detailOverlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeStudentDetail() {
+    detailOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+// ============================================================
+// SOUTH AFRICAN PHONE VALIDATION HELPER
+// ============================================================
+function isValidSaPhone(phone) {
+    if (!phone) return false;
+    const cleaned = phone.replace(/[^\d+]/g, '');
+    return /^(\+27\d{9}|0\d{9})$/.test(cleaned);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+initializeFeedStorage();
+setBadgeText();
+updateDrawerInfo();
+loadDarkMode();
+
+if (!isAdmin) {
+    composerCard.style.display = 'none';
+}
+
+// Only show message trigger for allowed roles
+const allowedMessagingRoles = ['teacher', 'parent', 'administrator', 'admin'];
+if (!allowedMessagingRoles.includes(selectedRole)) {
+    messageTrigger.style.display = 'none';
+}
+
+// Make badge clickable for administrators to view learners
+if (isAdmin) {
+    roleBadge.addEventListener('click', openStudentsModal);
+    roleBadge.style.cursor = 'pointer';
+}
+
+pickPhotoBtn.addEventListener('click', () => imageFile.click());
+imageFile.addEventListener('change', () => {
+    if (imageFile.files && imageFile.files[0]) {
+        imageUrl.value = imageFile.files[0].name;
+    }
+});
+publishBtn.addEventListener('click', createPostFromInput);
+clearBtn.addEventListener('click', resetComposer);
+
+// Student list events
+if (viewStudentsBtn) {
+    viewStudentsBtn.addEventListener('click', openStudentsModal);
+}
+studentsModalClose.addEventListener('click', closeStudentsModal);
+studentsOverlay.addEventListener('click', function(e) {
+    if (e.target === this) closeStudentsModal();
+});
+detailClose.addEventListener('click', closeStudentDetail);
+detailOverlay.addEventListener('click', function(e) {
+    if (e.target === this) closeStudentDetail();
+});
+
+renderFeed();
+</script>
+</body>
+</html>
