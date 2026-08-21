@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>School Learners</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-feature-settings:"liga" 1;}
+body{
+    background:linear-gradient(135deg,#f3f7ff 0%, #eef4fb 100%);
+    color:#173b5e;
+    min-height:100vh;
+    padding:24px;
+    overflow-x:hidden;
+    transition:background 0.3s ease, color 0.3s ease;
+}
+body.dark-mode{
+    background:linear-gradient(135deg,#0d1a2b 0%, #091420 100%);
+    color:#c8d8e8;
+}
+body.dark-mode .header-card,
+body.dark-mode .learners-card,
+body.dark-mode .learner-card,
+body.dark-mode .drawer-card{
+    background:#132436;
+    border-color:rgba(200,216,232,0.12);
+    color:#c8d8e8;
+}
+body.dark-mode .brand h1,
+body.dark-mode .learner-name,
+body.dark-mode .drawer-card .drawer-section-title,
+body.dark-mode .drawer-card .drawer-item span{
+    color:#c8d8e8;
+}
+body.dark-mode .learner-info,
+body.dark-mode .learner-phone,
+body.dark-mode .empty,
+body.dark-mode .parent-label,
+body.dark-mode .parent-value{
+    color:#7a9dba;
+}
+body.dark-mode .grade-folder{
+    background:#1a2e44;
+    border-color:rgba(200,216,232,0.1);
+}
+body.dark-mode .grade-folder-header{
+    color:#c8d8e8;
+}
+body.dark-mode .grade-folder-header:hover{
+    background:rgba(200,216,232,0.08);
+}
+body.dark-mode .grade-folder-count{
+    background:rgba(200,216,232,0.1);
+    color:#7a9dba;
+}
+body.dark-mode .learner-card{
+    background:#1a2e44;
+    border-color:rgba(200,216,232,0.1);
+}
+body.dark-mode .learner-card:hover{
+    background:#1e3a52;
+}
+body.dark-mode .drawer-divider{
+    border-color:rgba(200,216,232,0.12);
+}
+body.dark-mode .drawer-item:hover{
+    background:rgba(200,216,232,0.08);
+}
+body.dark-mode .drawer-item .icon{
+    background:rgba(200,216,232,0.1);
+}
+body.dark-mode .drawer-avatar{
+    background:linear-gradient(135deg,#1e4a76,#2a6fa8);
+}
+body.dark-mode .drawer-card .drawer-name{
+    color:#c8d8e8;
+}
+body.dark-mode .drawer-card .drawer-meta{
+    color:#7a9dba;
+}
+body.dark-mode .drawer-backdrop{
+    background:rgba(0,0,0,0.6);
+}
+body.dark-mode button.secondary{
+    background:#1a2e44;
+    color:#c8d8e8;
+    border-color:rgba(200,216,232,0.15);
+}
+body.dark-mode button.secondary:hover{
+    background:#1e3a52;
+}
+body.dark-mode .back-btn{
+    background:#1a2e44;
+    color:#c8d8e8;
+    border-color:rgba(200,216,232,0.15);
+}
+body.dark-mode .back-btn:hover{
+    background:#1e3a52;
+}
+body.dark-mode .search-panel input{
+    background:#1a2e44;
+    border-color:rgba(200,216,232,0.2);
+    color:#c8d8e8;
+}
+body.dark-mode .search-panel input::placeholder{
+    color:#7a9dba;
+}
+body.dark-mode .detail-modal{background:#132436;}
+body.dark-mode .detail-header{background:linear-gradient(135deg,#1e4a76,#2a6fa8);}
+body.dark-mode .detail-body .detail-field{background:rgba(200,216,232,0.06);border-color:rgba(200,216,232,0.1);}
+body.dark-mode .detail-body label{color:#7a9dba;}
+body.dark-mode .detail-body .value{color:#c8d8e8;}
+body.dark-mode .detail-name h3{color:#c8d8e8;}
+body.dark-mode .detail-name .detail-role{color:#7a9dba;}
+body.dark-mode .no-learners-msg .icon{opacity:0.7;}
+body.dark-mode .no-learners-msg{color:#7a9dba;}
+
+.container{max-width:860px;margin:0 auto;display:grid;gap:18px;}
+.header-card,
+.learners-card,
+.drawer-card{background:#fff;border-radius:20px;box-shadow:0 12px 30px rgba(13,41,68,0.10);border:1px solid rgba(23,59,94,0.08);transition:background 0.3s ease, border-color 0.3s ease;}
+.header-card{padding:0 0 8px;display:flex;justify-content:space-between;align-items:center;gap:14px;background:transparent;border:none;box-shadow:none;}
+.brand{display:flex;align-items:center;gap:12px;}
+.brand h1{font-size:28px;margin-bottom:4px;color:#173b5e;font-weight:700;font-family:'Candara','Segoe UI',sans-serif;letter-spacing:0.01em;}
+.back-btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 16px;border-radius:12px;background:#f4f7fb;color:#173b5e;border:1px solid rgba(23,59,94,0.1);cursor:pointer;font-weight:600;font-size:14px;font-family:Georgia, 'Times New Roman', Times, serif;width:fit-content;margin-bottom:8px;line-height:1;
+}
+.back-btn .back-arrow-svg{
+    display:block;flex-shrink:0;
+}
+.back-btn:hover{background:#eaf2fa;}
+.learners-card{padding:18px 20px;display:grid;gap:14px;}
+.search-panel{display:flex;align-items:center;gap:10px;}
+.search-panel input{flex:1;min-width:0;width:100%;border:1px solid rgba(23,59,94,0.16);border-radius:14px;padding:12px 14px;font-size:15px;color:#173b5e;outline:none;background:#fbfdff;}
+.search-panel input:focus{border-color:#173b5e;box-shadow:0 0 0 2px rgba(23,59,94,0.1);}
+button{border:none;border-radius:12px;padding:11px 16px;font-weight:700;cursor:pointer;background:#173b5e;color:#fff;box-shadow:0 8px 16px rgba(13,41,68,0.14);font-family:Georgia, 'Times New Roman', Times, serif;}
+button:hover{background:#0f2a45;}
+button.secondary{background:#f4f7fb;color:#173b5e;box-shadow:none;border:1px solid rgba(23,59,94,0.1);}
+button.secondary:hover{background:#eaf2fa;}
+.learners-list{display:grid;gap:10px;}
+.grade-folder{border:1px solid rgba(23,59,94,0.08);border-radius:14px;background:#f7fbff;overflow:hidden;box-shadow:0 2px 8px rgba(23,59,94,0.04);}
+.grade-folder-header{display:flex;justify-content:space-between;align-items:center;width:100%;padding:12px 14px;border:none;background:transparent;color:#173b5e;font-weight:700;font-size:14px;cursor:pointer;text-align:left;font-family:inherit;letter-spacing:0.01em;}
+.grade-folder-header:hover{background:rgba(23,59,94,0.04);}
+.grade-folder-body{display:none;gap:8px;padding:0 12px 12px;}
+.grade-folder-count{font-size:12px;color:#5d6f80;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(23,59,94,0.08);}
+.learner-card{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;background:#f7fbff;border:1px solid rgba(23,59,94,0.08);cursor:pointer;transition:background 0.15s;}
+.learner-card:hover{background:#eef6ff;}
+.learner-avatar{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#43a047,#66bb6a);color:#fff;font-weight:700;flex-shrink:0;font-size:18px;}
+.learner-meta{flex:1;min-width:0;}
+.learner-name{font-size:14px;font-weight:700;color:#173b5e;}
+.learner-info{font-size:12px;color:#5d6f80;margin-top:2px;}
+.learner-phone{font-size:12px;color:#5d6f80;}
+.chevron{color:#90a2b4;font-size:14px;flex-shrink:0;}
+.empty{padding:20px;text-align:center;color:#5d6f80;border-radius:16px;border:1px dashed rgba(23,59,94,0.2);background:#fcfeff;}
+.empty .icon{font-size:48px;margin-bottom:10px;display:block;}
+
+/* ===== FLOATING ADD BUTTON (ADMIN ONLY) ===== */
+.fab-plus{
+    position:fixed;right:26px;bottom:110px;width:56px;height:56px;border-radius:50%;border:none;background:linear-gradient(135deg,#173b5e,#3a79b8);color:#fff;font-size:30px;font-weight:700;cursor:pointer;display:grid;place-items:center;box-shadow:0 10px 24px rgba(23,59,94,0.35);z-index:1500;transition:transform 0.2s ease, background 0.2s ease;text-decoration:none;
+}
+.fab-plus:hover{transform:translateY(-3px) scale(1.05);background:linear-gradient(135deg,#0f2a45,#2a6fa8);}
+body.dark-mode .fab-plus{background:linear-gradient(135deg,#1e4a76,#2a6fa8);box-shadow:0 10px 24px rgba(0,0,0,0.45);}
+@media (max-width: 640px){
+    .fab-plus{right:20px;bottom:100px;width:52px;height:52px;font-size:26px;}
+}
+
+/* ===== LEARNER DETAIL MODAL ===== */
+.detail-overlay{position:fixed;inset:0;background:rgba(7,18,32,0.55);display:none;align-items:center;justify-content:center;padding:20px;z-index:2200;backdrop-filter:blur(2px);}
+.detail-overlay.active{display:flex;}
+.detail-modal{background:#fff;border-radius:22px;width:min(480px,100%);max-height:85vh;overflow-y:auto;box-shadow:0 20px 50px rgba(7,18,32,0.3);animation:modalIn 0.2s ease;}
+@keyframes modalIn{from{opacity:0;transform:translateY(20px) scale(0.96);}to{opacity:1;transform:translateY(0) scale(1);}}
+.detail-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid rgba(23,59,94,0.1);background:linear-gradient(135deg,#173b5e,#3a79b8);color:#fff;position:sticky;top:0;z-index:1;}
+.detail-header h2{font-size:17px;font-weight:700;}
+.detail-close{width:34px;height:34px;border-radius:50%;border:none;background:rgba(255,255,255,0.15);color:#fff;cursor:pointer;display:grid;place-items:center;padding:0;flex-shrink:0;line-height:0;}
+.detail-close .close-x-svg{display:block;}
+.detail-close:hover{background:rgba(255,255,255,0.25);}
+.detail-body{padding:20px;}
+.detail-avatar-row{display:flex;align-items:center;gap:14px;margin-bottom:20px;}
+.detail-avatar{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#43a047,#66bb6a);color:#fff;font-weight:700;font-size:28px;flex-shrink:0;}
+.detail-name h3{font-size:20px;color:#173b5e;margin:0;}
+.detail-name .detail-role{font-size:13px;color:#5d6f80;margin-top:2px;}
+.detail-grid{display:grid;gap:12px;}
+.detail-field{padding:12px 14px;border-radius:12px;background:rgba(23,59,94,0.06);border:1px solid rgba(23,59,94,0.08);}
+.detail-field label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#5d6f80;margin-bottom:3px;font-weight:600;}
+.detail-field .value{font-size:15px;color:#173b5e;font-weight:600;word-break:break-all;}
+.detail-field .value.sa-phone{font-family:'Courier New', monospace;letter-spacing:0.05em;}
+
+/* ===== BOTTOM TAB BAR ===== */
+.bottom-tab-bar{
+    position:fixed;left:50%;bottom:18px;transform:translateX(-50%);width:min(520px, calc(100% - 26px));display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-radius:999px;background:rgba(255,255,255,0.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(23,59,94,0.12);box-shadow:0 18px 35px rgba(13,41,68,0.14);z-index:1000;
+}
+body.dark-mode .bottom-tab-bar{background:rgba(19,36,54,0.92);border-color:rgba(200,216,232,0.12);box-shadow:0 18px 35px rgba(0,0,0,0.30);}
+.tab-btn{
+    flex:1;display:grid;place-items:center;width:62px;height:62px;border:none;background:transparent;color:#173b5e;border-radius:50%;text-decoration:none;font-size:32px;cursor:pointer;transition:all 0.2s ease;
+}
+.tab-btn:hover{background:rgba(23,59,94,0.07);transform:translateY(-1px);}
+.tab-btn.active{background:linear-gradient(135deg,#173b5e,#3a79b8);color:#fff;box-shadow:0 10px 22px rgba(23,59,94,0.20);}
+body.dark-mode .tab-btn{color:#c8d8e8;}
+body.dark-mode .tab-btn:hover{background:rgba(200,216,232,0.09);}
+body.dark-mode .tab-btn.active{background:linear-gradient(135deg,#1e4a76,#2a6fa8);}
+.file-tab-btn{font-size:30px;}
+
+@media (max-width: 640px){
+    body{padding:14px;}
+    .container{gap:14px;}
+    .header-card{flex-direction:column;align-items:flex-start;}
+    .brand h1{font-size:20px;}
+    .learners-card{padding:16px;}
+    .learner-card{padding:10px 12px;}
+    .learner-avatar{width:40px;height:40px;font-size:16px;}
+    .search-panel{flex-direction:column;}
+    .search-panel button{width:100%;}
+    .detail-modal{width:100%;max-height:90vh;border-radius:18px;}
+    .detail-header{padding:14px 16px;}
+    .detail-body{padding:16px;}
+    .detail-avatar{width:54px;height:54px;font-size:24px;}
+    .detail-name h3{font-size:18px;}
+}
+@media (max-width: 400px){
+    body{padding:10px;}
+    .container{gap:10px;}
+    .header-card{padding:14px 16px;}
+    .brand h1{font-size:18px;}
+    .learners-card{padding:12px 14px;}
+    .learner-name{font-size:13px;}
+    .learner-info,.learner-phone{font-size:11px;}
+    .detail-field .value{font-size:14px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== FLOATING ADD BUTTON (ADMIN ONLY - links to timetable posting page) ===== -->
+<a class="fab-plus" id="adminTimetableFab" href="timetable.html" title="Post timetable" aria-label="Post timetable" style="display:none;">+</a>
+
+<!-- ===== BOTTOM TAB BAR (populated by tab-bar.js) ===== -->
+<div class="bottom-tab-bar" id="bottomTabBar" aria-label="Primary navigation"></div>
+
+<div class="container">
+    <div class="header-card">
+        <div class="brand">
+            <h1>School Learners</h1>
+        </div>
+    </div>
+
+    <div class="learners-card">
+        <button class="back-btn" id="backToFeedBtn">
+            <svg class="back-arrow-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            <span>Back to Feed</span>
+        </button>
+        <div class="search-panel">
+            <input type="search" id="learnerSearchInput" placeholder="Search learners by name, grade, or parent..." aria-label="Search learners" />
+            <button type="button" id="clearSearchBtn" class="secondary">Clear</button>
+        </div>
+        <div class="learners-list" id="learnersList">
+            <div class="empty">
+                <span class="icon">📚</span>
+                Loading learners...
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== LEARNER DETAIL MODAL ===== -->
+<div class="detail-overlay" id="detailOverlay">
+    <div class="detail-modal">
+        <div class="detail-header">
+            <h2>Learner Profile</h2>
+            <button type="button" class="detail-close" id="detailClose" aria-label="Close learner profile">
+                <svg class="close-x-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="detail-body" id="detailBody">
+            <!-- Dynamically populated -->
+        </div>
+    </div>
+</div>
+
+<script>
+const profileStorageKey = 'schoolProfileData';
+const usersRegistryKey = 'schoolUsersRegistry';
+const savedProfile = JSON.parse(localStorage.getItem(profileStorageKey) || '{}');
+const selectedRole = (savedProfile.role || '').toString().trim().toLowerCase();
+const currentSchool = (savedProfile.schoolName || savedProfile.schoolSearch || '').toString().trim();
+const currentSchoolDisplay = currentSchool || 'School';
+const isAdmin = selectedRole === 'administrator' || selectedRole === 'admin';
+
+const learnersList = document.getElementById('learnersList');
+const learnerSearchInput = document.getElementById('learnerSearchInput');
+const clearSearchBtn = document.getElementById('clearSearchBtn');
+const backToFeedBtn = document.getElementById('backToFeedBtn');
+const detailOverlay = document.getElementById('detailOverlay');
+const detailClose = document.getElementById('detailClose');
+const detailBody = document.getElementById('detailBody');
+const adminTimetableFab = document.getElementById('adminTimetableFab');
+
+// ============================================================
+// ADMIN FLOATING PLUS BUTTON (post timetable)
+// ============================================================
+function initAdminFab() {
+    if (isAdmin && adminTimetableFab) {
+        adminTimetableFab.style.display = 'grid';
+    }
+}
+
+// ============================================================
+// DARK MODE
+// ============================================================
+function loadDarkMode() {
+    const darkMode = localStorage.getItem('schoolDarkMode') === 'true';
+    document.body.classList.toggle('dark-mode', darkMode);
+}
+
+// ============================================================
+// FORMAT SOUTH AFRICAN PHONE NUMBER
+// ============================================================
+function formatSaPhone(phone) {
+    if (!phone) return '—';
+    let cleaned = phone.replace(/[^\d+]/g, '');
+    if (/^0\d{9}$/.test(cleaned)) {
+        return cleaned.replace(/^(\d{3})(\d{3})(\d{4})$/, '$1 $2 $3');
+    }
+    if (/^\+27\d{9}$/.test(cleaned)) {
+        return cleaned.replace(/^(\+27)(\d{2})(\d{3})(\d{4})$/, '$1 $2 $3 $4');
+    }
+    if (/^\d{10}$/.test(cleaned)) {
+        return cleaned.replace(/^(\d{3})(\d{3})(\d{4})$/, '$1 $2 $3');
+    }
+    return phone;
+}
+
+// ============================================================
+// GET REGISTERED LEARNERS (students only)
+// ============================================================
+function getLearners() {
+    let registry = [];
+    try {
+        const saved = localStorage.getItem(usersRegistryKey);
+        registry = saved ? JSON.parse(saved) : [];
+        if (!Array.isArray(registry)) registry = [];
+    } catch (error) {
+        console.log('Unable to read users registry', error);
+        registry = [];
+    }
+
+    const normalizedSchool = currentSchool.toLowerCase().trim();
+
+    return registry.filter((user) => {
+        const role = (user.role || '').toString().trim().toLowerCase();
+        if (role !== 'student') return false;
+        const school = (user.schoolName || '').toString().trim().toLowerCase();
+        if (normalizedSchool && school && school !== normalizedSchool) return false;
+        if (!normalizedSchool && !school) return false;
+        return true;
+    }).sort((a, b) => {
+        const nameA = (a.fullName || '').toString().trim().toLowerCase();
+        const nameB = (b.fullName || '').toString().trim().toLowerCase();
+        return nameA.localeCompare(nameB);
+    });
+}
+
+// ============================================================
+// RENDER LEARNERS
+// ============================================================
+function renderLearners() {
+    const learners = getLearners();
+    const searchValue = (learnerSearchInput ? learnerSearchInput.value : '').trim().toLowerCase();
+
+    const filtered = learners.filter((learner) => {
+        if (!searchValue) return true;
+        const fullName = (learner.fullName || '').toLowerCase();
+        const grade = (learner.grade || '').toLowerCase();
+        const school = (learner.schoolName || '').toLowerCase();
+        const parentName = (learner.parentName || '').toLowerCase();
+        const parentEmail = (learner.parentEmail || '').toLowerCase();
+        const email = (learner.email || '').toLowerCase();
+        const phone = (learner.phone || '').toLowerCase();
+        return fullName.includes(searchValue) || grade.includes(searchValue) || school.includes(searchValue) || parentName.includes(searchValue) || parentEmail.includes(searchValue) || email.includes(searchValue) || phone.includes(searchValue);
+    });
+
+    if (!filtered.length) {
+        learnersList.innerHTML = `
+            <div class="empty">
+                <span class="icon">📚</span>
+                ${searchValue ? 'No learners match your search.' : 'No learners registered yet.'}
+            </div>
+        `;
+        return;
+    }
+
+    const grouped = filtered.reduce((acc, learner) => {
+        const grade = (learner.grade || 'Unassigned').toString().trim() || 'Unassigned';
+        if (!acc[grade]) acc[grade] = [];
+        acc[grade].push(learner);
+        return acc;
+    }, {});
+
+    const gradeNames = Object.keys(grouped).sort((a, b) => {
+        if (a === 'Unassigned') return 1;
+        if (b === 'Unassigned') return -1;
+        const numA = parseInt(a.match(/\d+/), 10) || 0;
+        const numB = parseInt(b.match(/\d+/), 10) || 0;
+        return numA - numB;
+    });
+
+    learnersList.innerHTML = gradeNames.map((grade) => {
+        const items = grouped[grade];
+        const folderId = `grade-${grade.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}`;
+        const childrenHtml = items.map((learner, index) => {
+            const initial = (learner.fullName || 'S').charAt(0).toUpperCase();
+            const phoneDisplay = formatSaPhone(learner.phone);
+            return `
+                <div class="learner-card" onclick="openLearnerDetail(${filtered.indexOf(learner)})">
+                    <div class="learner-avatar">${initial}</div>
+                    <div class="learner-meta">
+                        <div class="learner-name">${learner.fullName || 'Unknown'}</div>
+                        <div class="learner-info">${learner.schoolName || '—'} • Grade ${grade}</div>
+                        <div class="learner-phone">${phoneDisplay}</div>
+                    </div>
+                    <span class="chevron">›</span>
+                </div>
+            `;
+        }).join('');
+
+        return `
+            <div class="grade-folder">
+                <button type="button" class="grade-folder-header" onclick="toggleGradeFolder('${folderId}')">
+                    <span>
+                        <svg class="folder-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 70" width="16" height="11" aria-hidden="true" style="vertical-align:middle;margin-right:4px;">
+                            <path d="M 6,5 H 35 L 47,17 H 94 A 6,6 0 0 1 100,23 V 64 A 6,6 0 0 1 94,70 H 6 A 6,6 0 0 1 0,64 V 11 A 6,6 0 0 1 6,5 Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/>
+                            <path d="M 0,23 H 100" fill="none" stroke="currentColor" stroke-width="4"/>
+                        </svg>
+                        ${grade}
+                    </span>
+                    <span class="grade-folder-count">${items.length} learner${items.length === 1 ? '' : 's'}</span>
+                </button>
+                <div class="grade-folder-body" id="${folderId}">
+                    ${childrenHtml}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function toggleGradeFolder(folderId) {
+    const folderBody = document.getElementById(folderId);
+    if (!folderBody) return;
+    folderBody.style.display = folderBody.style.display === 'none' ? 'grid' : 'none';
+}
+
+// ============================================================
+// LEARNER DETAIL MODAL (opens when name is clicked)
+// ============================================================
+function openLearnerDetail(index) {
+    const learners = getLearners();
+    const learner = learners[index];
+    if (!learner) return;
+
+    const fullName = learner.fullName || '—';
+    const email = learner.email || '—';
+    const phone = learner.phone || '—';
+    const phoneFormatted = formatSaPhone(phone);
+    const schoolName = learner.schoolName || '—';
+    const province = learner.province || '—';
+    const grade = learner.grade || '—';
+    const role = learner.role || 'Student';
+    const initial = fullName.charAt(0).toUpperCase();
+    const parentName = learner.parentName ? learner.parentName : '—';
+    const parentEmail = learner.parentEmail ? learner.parentEmail : '—';
+
+    detailBody.innerHTML = `
+        <div class="detail-avatar-row">
+            <div class="detail-avatar">${initial}</div>
+            <div class="detail-name">
+                <h3>${fullName}</h3>
+                <div class="detail-role">${role}</div>
+            </div>
+        </div>
+        <div class="detail-grid">
+            <div class="detail-field">
+                <label>Full Name</label>
+                <div class="value">${fullName}</div>
+            </div>
+            <div class="detail-field">
+                <label>Email Address</label>
+                <div class="value">${email}</div>
+            </div>
+            <div class="detail-field">
+                <label>Phone Number</label>
+                <div class="value sa-phone">${phoneFormatted}</div>
+            </div>
+            <div class="detail-field">
+                <label>School</label>
+                <div class="value">${schoolName}</div>
+            </div>
+            <div class="detail-field">
+                <label>Province</label>
+                <div class="value">${province}</div>
+            </div>
+            <div class="detail-field">
+                <label>Grade</label>
+                <div class="value">${grade}</div>
+            </div>
+            <div class="detail-field">
+                <label>Linked Parent</label>
+                <div class="value">${parentName}</div>
+            </div>
+            <div class="detail-field">
+                <label>Parent Email</label>
+                <div class="value">${parentEmail}</div>
+            </div>
+        </div>
+    `;
+
+    detailOverlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeLearnerDetail() {
+    detailOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+// ============================================================
+// TAB BAR ACTIONS
+// ============================================================
+if (clearSearchBtn) {
+    clearSearchBtn.addEventListener('click', function() {
+        if (learnerSearchInput) learnerSearchInput.value = '';
+        renderLearners();
+    });
+}
+
+if (learnerSearchInput) {
+    learnerSearchInput.addEventListener('input', renderLearners);
+}
+
+if (backToFeedBtn) {
+    backToFeedBtn.addEventListener('click', function() {
+        window.location.href = 'admin-feed.html';
+    });
+}
+
+detailClose.addEventListener('click', closeLearnerDetail);
+detailOverlay.addEventListener('click', function(e) {
+    if (e.target === this) closeLearnerDetail();
+});
+
+// ============================================================
+// INIT
+// ============================================================
+loadDarkMode();
+initAdminFab();
+renderLearners();
+</script>
+<script src="tab-bar.js"></script>
+</body>
+</html>
