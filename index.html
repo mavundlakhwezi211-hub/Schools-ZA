@@ -1,0 +1,235 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home</title>
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    font-feature-settings: "liga" 1;
+}
+
+body{
+    background:#1c0e9c;
+    color:#173b5e;
+    min-height:100vh;
+    overflow-x:hidden;
+}
+
+.welcome-page{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+    background:linear-gradient(135deg, #173b5e, #0d2944);
+}
+
+@media (max-width: 640px){
+    .welcome-page{
+        padding:14px;
+    }
+
+    .welcome-card,
+    .container{
+        padding:24px;
+        border-radius:16px;
+    }
+
+    .welcome-card h1{
+        font-size:26px;
+    }
+
+    .start-btn,
+    .submit-btn{
+        width:100%;
+        text-align:center;
+    }
+
+    .search-box{
+        flex-direction:column;
+    }
+
+    .profile-stats{
+        grid-template-columns:1fr;
+    }
+    .profile-card h2{font-size:18px;}
+    .result-actions{flex-direction:column;}
+    .result-actions .submit-btn{width:100%;}
+    .input-row{flex-direction:column;}
+    .child-row{flex-wrap:wrap;}
+    .child-row input{min-width:0;}
+    .summary-panel{padding:16px;}
+}
+
+@media (max-width: 480px){
+    .welcome-page{padding:10px;}
+    .welcome-card,.container{padding:20px;border-radius:14px;}
+    .welcome-card h1{font-size:22px;}
+    .welcome-card p{font-size:14px;}
+    .hero-illustration{padding:8px;max-width:260px;}
+    .container h1{font-size:22px;}
+    .subtitle{font-size:14px;}
+    .pin-input-wrapper input{padding-right:44px;}
+    .pin-toggle{font-size:16px;}
+    .stat-pill{padding:8px 10px;}
+    .activity-item{gap:8px;}
+    .profile-card{padding:16px;}
+    .profile-card-top{gap:10px;}
+    .avatar{width:48px;height:48px;}
+    input,select{padding:12px;font-size:15px;}
+    .submit-btn{padding:14px;font-size:18px;}
+}
+
+@media (max-width: 400px){
+    .welcome-page{padding:8px;}
+    .welcome-card,.container{padding:16px;border-radius:12px;}
+    .welcome-card h1{font-size:20px;}
+    .welcome-card p{font-size:13px;line-height:1.5;}
+    .hero-illustration{padding:6px;max-width:220px;}
+    .start-btn{padding:12px 18px;font-size:16px;}
+    .container h1{font-size:20px;}
+    .subtitle{font-size:13px;margin-bottom:18px;}
+    .input-group{margin-bottom:14px;}
+    input,select{padding:10px 12px;font-size:14px;border-radius:10px;}
+    label{font-size:13px;margin-bottom:6px;}
+    .search-box{gap:8px;}
+    .search-box input{font-size:14px;}
+    .school-select{min-height:140px;}
+    .submit-btn{padding:12px;font-size:17px;margin-top:16px;border-radius:10px;}
+    .summary-panel{padding:14px;gap:12px;}
+    .profile-card{padding:14px;border-radius:14px;}
+    .profile-card h2{font-size:16px;}
+    .profile-card .meta{font-size:13px;}
+    .activity-feed{padding:14px;border-radius:14px;}
+    .activity-title{font-size:15px;}
+    .feed-badge{font-size:11px;padding:4px 8px;}
+    .activity-icon{width:30px;height:30px;font-size:13px;}
+    .activity-meta{font-size:12px;}
+    .result-actions{gap:8px;}
+    .result-actions .submit-btn{min-width:0;padding:12px;font-size:15px;}
+    .child-row input{font-size:14px;padding:10px 12px;}
+    .add-child-btn{padding:6px;font-size:13px;}
+    .remove-child-btn{width:36px;height:36px;font-size:16px;}
+    .no-result-msg{font-size:13px;padding:8px;}
+}
+
+@media (max-width: 360px){
+    .welcome-page{padding:6px;}
+    .welcome-card,.container{padding:14px;border-radius:10px;}
+    .welcome-card h1{font-size:18px;}
+    .welcome-card p{font-size:12px;}
+    .hero-illustration{max-width:180px;margin:12px auto 16px;}
+    .start-btn{padding:10px 16px;font-size:15px;}
+    .container h1{font-size:18px;}
+    .subtitle{font-size:12px;margin-bottom:14px;}
+    input,select{padding:8px 10px;font-size:13px;border-radius:8px;}
+    .submit-btn{padding:10px;font-size:16px;}
+    .stat-pill strong{font-size:12px;}
+    .profile-stats{gap:6px;}
+}
+
+.welcome-card{
+    background:rgba(255,255,255,0.95);
+    color:#173b5e;
+    width:100%;
+    max-width:560px;
+    padding:35px;
+    border-radius:18px;
+    text-align:center;
+    box-shadow:0 12px 30px rgba(0,0,0,0.25);
+}
+
+.welcome-card h1{
+    margin-bottom:10px;
+    font-size:32px;
+}
+
+.welcome-card p{
+    margin-bottom:18px;
+    color:#666;
+    line-height:1.6;
+}
+
+.hero-illustration{
+    margin:18px auto 22px;
+    width:100%;
+    max-width:320px;
+    padding:12px;
+    border-radius:16px;
+    background:linear-gradient(135deg, #f8fbff, #dceeff);
+    border:2px solid #cfe3f7;
+}
+
+.start-btn{
+    display:inline-block;
+    background:#173b5e;
+    color:#fff;
+    padding:14px 24px;
+    border-radius:10px;
+    text-decoration:none;
+    font-size:18px;
+    font-weight:bold;
+    font-family:Georgia, 'Times New Roman', Times, serif;
+}
+
+.start-btn:hover{
+    background:#0f2a45;
+}
+
+</style>
+</head>
+<body>
+<section class="welcome-page">
+    <div class="welcome-card">
+        <h1>🎓 Welcome!</h1>
+        <p>🇿🇦 We're glad you're here. Create your profile and get connected with schools in South Africa.</p>
+
+        <div class="hero-illustration" aria-label="Cartoon children smiling and waving">
+            <svg viewBox="0 0 320 180" width="100%" height="auto" role="img">
+                <circle cx="78" cy="58" r="18" fill="#f4c27a"></circle>
+                <rect x="62" y="76" width="32" height="46" rx="12" fill="#173b5e"></rect>
+                <path d="M72 106 L52 132" stroke="#173b5e" stroke-width="5" stroke-linecap="round"></path>
+                <path d="M94 106 L114 132" stroke="#173b5e" stroke-width="5" stroke-linecap="round"></path>
+                <path d="M75 84 L46 82" stroke="#173b5e" stroke-width="5" stroke-linecap="round"></path>
+                <path d="M84 86 L110 72" stroke="#173b5e" stroke-width="5" stroke-linecap="round"></path>
+                <circle cx="71" cy="58" r="2.2" fill="#222"></circle>
+                <circle cx="85" cy="58" r="2.2" fill="#222"></circle>
+                <path d="M69 67 Q78 75 87 67" stroke="#222" stroke-width="2.5" fill="none" stroke-linecap="round"></path>
+
+                <circle cx="180" cy="54" r="15" fill="#f2b89b"></circle>
+                <rect x="166" y="69" width="28" height="44" rx="10" fill="#f4a261"></rect>
+                <path d="M176 112 L154 136" stroke="#f4a261" stroke-width="5" stroke-linecap="round"></path>
+                <path d="M194 112 L214 136" stroke="#f4a261" stroke-width="5" stroke-linecap="round"></path>
+                <path d="M176 80 L148 74" stroke="#f4a261" stroke-width="5" stroke-linecap="round"></path>
+                <path d="M188 80 L214 70" stroke="#f4a261" stroke-width="5" stroke-linecap="round"></path>
+                <circle cx="173" cy="54" r="2.2" fill="#222"></circle>
+                <circle cx="187" cy="54" r="2.2" fill="#222"></circle>
+                <path d="M171 63 Q180 71 189 63" stroke="#222" stroke-width="2.5" fill="none" stroke-linecap="round"></path>
+
+                <circle cx="248" cy="62" r="16" fill="#8ecae6"></circle>
+                <rect x="232" y="78" width="32" height="46" rx="12" fill="#2a9d8f"></rect>
+                <path d="M242 124 L220 144" stroke="#2a9d8f" stroke-width="5" stroke-linecap="round"></path>
+                <path d="M258 124 L278 144" stroke="#2a9d8f" stroke-width="5" stroke-linecap="round"></path>
+                <path d="M242 86 L218 96" stroke="#2a9d8f" stroke-width="5" stroke-linecap="round"></path>
+                <path d="M254 86 L284 78" stroke="#2a9d8f" stroke-width="5" stroke-linecap="round"></path>
+                <circle cx="241" cy="62" r="2.2" fill="#222"></circle>
+                <circle cx="255" cy="62" r="2.2" fill="#222"></circle>
+                <path d="M239 71 Q248 79 257 71" stroke="#222" stroke-width="2.5" fill="none" stroke-linecap="round"></path>
+
+                <path d="M24 152 C70 125, 130 122, 190 150" stroke="#7bc96f" stroke-width="10" fill="none" stroke-linecap="round"></path>
+                <path d="M190 150 C236 126, 284 124, 298 150" stroke="#f4c542" stroke-width="10" fill="none" stroke-linecap="round"></path>
+            </svg>
+        </div>
+
+        <a href="create-profile.html" class="start-btn">Get Started</a>
+    </div>
+</section>
+</body>
+</html>

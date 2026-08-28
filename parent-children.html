@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parent Child Details</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
+body{
+    min-height:100vh;
+    background:linear-gradient(135deg, #173b5e 0%, #0d2944 100%);
+    color:#173b5e;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+}
+.card{
+    width:100%;
+    max-width:620px;
+    background:rgba(255,255,255,0.96);
+    border-radius:20px;
+    padding:28px;
+    box-shadow:0 16px 40px rgba(13,41,68,0.18);
+}
+h1{font-size:24px;margin-bottom:8px;color:#173b5e;}
+.subtitle{color:#5d6f80;font-size:15px;margin-bottom:18px;line-height:1.6;}
+.summary-box{background:#f4f7fb;border:1px solid rgba(23,59,94,0.12);border-radius:12px;padding:12px 14px;margin-bottom:18px;}
+.summary-box strong{display:block;margin-bottom:4px;}
+.child-list{display:grid;gap:12px;}
+.child-row{position:relative;display:grid;gap:10px;padding:14px;border:1px solid rgba(23,59,94,0.12);border-radius:14px;background:#fff;}
+.row-label{font-size:13px;font-weight:700;color:#173b5e;text-transform:uppercase;letter-spacing:.06em;}
+.remove-child-btn{position:absolute;top:10px;right:10px;width:34px;height:34px;min-width:34px;border-radius:50%;background:#fdecec;color:#c0392b;border:1px solid rgba(192,57,43,0.25);display:flex;align-items:center;justify-content:center;font-size:18px;line-height:1;padding:0;font-weight:700;}
+.remove-child-btn:hover{background:#f9d7d7;}
+.row-label{padding-right:44px;}
+input,select{width:100%;padding:12px 14px;border:1px solid rgba(23,59,94,0.18);border-radius:12px;font-size:15px;background:#fff;color:#173b5e;}
+input:focus,select:focus{outline:none;border-color:#173b5e;box-shadow:0 0 0 3px rgba(23,59,94,0.12);} 
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;align-items:center;}
+button{border:none;border-radius:12px;padding:12px 16px;font-size:15px;cursor:pointer;font-weight:600;}
+.add-btn{background:transparent;border:2px dashed rgba(23,59,94,0.35);color:#173b5e;width:48px;height:48px;min-width:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0;}
+.add-btn:hover{background:#f4f7fb;}
+.add-btn .plus-icon{font-size:26px;font-weight:400;line-height:1;}
+.submit-btn{background:#173b5e;color:#fff;flex:1;}
+.submit-btn:hover{background:#0f2a45;}
+.secondary-btn{background:#f4f7fb;color:#173b5e;border:1px solid rgba(23,59,94,0.12);} 
+.secondary-btn:hover{background:#eaf2fa;}
+.note{font-size:12px;color:#5d6f80;margin-top:10px;}
+@media (max-width: 640px){
+    body{padding:14px;align-items:flex-start;font-size:16px;}
+    .card{padding:20px;border-radius:16px;}
+    h1{font-size:26px;}
+    .subtitle{font-size:16px;}
+    input,select{padding:14px 16px;font-size:16px;border-radius:12px;}
+    .row-label{font-size:14px;padding-right:50px;}
+    .remove-child-btn{width:42px;height:42px;min-width:42px;font-size:20px;top:12px;right:12px;}
+    button{font-size:16px;padding:14px 18px;}
+    .add-btn{width:54px;height:54px;min-width:54px;}
+    .add-btn .plus-icon{font-size:30px;}
+    .add-actions{flex-wrap:nowrap;}
+    .add-actions .submit-btn{flex:1;}
+    .summary-box{font-size:15px;}
+}
+</style>
+</head>
+<body>
+<div class="card">
+    <h1>👧 Add your child or children</h1>
+    <p class="subtitle">We will create learner profiles for each child so they appear in the school admin learner list. Adding at least one child is required.</p>
+
+    <div class="summary-box" id="parentSummary">
+        <strong>Parent profile</strong>
+        <div id="summaryText">Loading your details…</div>
+    </div>
+
+    <form id="childForm">
+        <div class="child-list" id="childList"></div>
+        <div class="actions add-actions">
+            <button type="button" class="add-btn" id="addChildBtn" title="Add another child" aria-label="Add another child"><span class="plus-icon">+</span></button>
+            <button type="submit" class="submit-btn">Save children</button>
+        </div>
+    </form>
+</div>
+
+<script>
+const storageKey = 'schoolProfileData';
+const registryKey = 'schoolUsersRegistry';
+const form = document.getElementById('childForm');
+const childList = document.getElementById('childList');
+const addChildBtn = document.getElementById('addChildBtn');
+const summaryText = document.getElementById('summaryText');
+
+function createChildRow(initialValue = {}) {
+    const row = document.createElement('div');
+    row.className = 'child-row';
+    row.dataset.initialName = initialValue.fullName || '';
+    row.innerHTML = `
+        <button type="button" class="remove-child-btn" title="Delete this child profile" aria-label="Delete this child profile">&times;</button>
+        <div class="row-label">Child profile</div>
+        <input type="text" class="child-name" placeholder="Child full name" value="${(initialValue.fullName || '').replace(/"/g, '&quot;')}" required>
+        <select class="child-grade" required>
+            <option value="">Select grade</option>
+            <option>Grade 8</option>
+            <option>Grade 9</option>
+            <option>Grade 10</option>
+            <option>Grade 11</option>
+            <option>Grade 12</option>
+        </select>
+        <input type="email" class="child-email" placeholder="Child email (optional)" value="${(initialValue.email || '').replace(/"/g, '&quot;')}">
+        <input type="tel" class="child-phone" placeholder="Child phone (optional)" value="${(initialValue.phone || '').replace(/"/g, '&quot;')}">
+    `;
+    const gradeSelect = row.querySelector('.child-grade');
+    if (initialValue.grade) {
+        gradeSelect.value = initialValue.grade;
+    }
+    row.querySelector('.remove-child-btn').addEventListener('click', function() {
+        removeChildRow(row);
+    });
+    return row;
+}
+
+function removeChildRow(row) {
+    const parent = getParentProfile();
+    const initialName = (row.dataset.initialName || '').trim();
+
+    // If this child was previously saved, delete their profile from storage
+    if (parent && initialName) {
+        const confirmed = confirm(`Delete ${initialName}'s saved profile? This cannot be undone.`);
+        if (!confirmed) return;
+
+        const child = {
+            fullName: initialName,
+            grade: row.querySelector('.child-grade').value,
+            email: row.querySelector('.child-email').value.trim(),
+            phone: row.querySelector('.child-phone').value.trim()
+        };
+
+        const registry = readRegistry();
+        const index = findMatchingChildIndex(registry, child, parent);
+        if (index >= 0) {
+            registry.splice(index, 1);
+            saveRegistry(registry);
+        }
+
+        if (Array.isArray(parent.children)) {
+            const savedParent = { ...parent, children: parent.children.filter((name) => name !== initialName) };
+            localStorage.setItem(storageKey, JSON.stringify(savedParent));
+        }
+    }
+
+    row.remove();
+    // Always keep at least one child row on the page
+    if (!childList.querySelector('.child-row')) {
+        addChildRow();
+    }
+}
+
+function getParentProfile() {
+    try {
+        const saved = localStorage.getItem(storageKey);
+        if (!saved) return null;
+        const parsed = JSON.parse(saved);
+        return parsed;
+    } catch (error) {
+        console.log('Unable to load parent profile', error);
+        return null;
+    }
+}
+
+function loadParentSummary() {
+    const parent = getParentProfile();
+    if (!parent) {
+        summaryText.textContent = 'No parent profile found. Please create your profile first.';
+        return false;
+    }
+
+    const school = parent.schoolName || parent.schoolSearch || 'Selected school';
+    const province = parent.province || 'Province';
+    summaryText.innerHTML = `
+        <div><strong>${parent.fullName || 'Parent'}</strong></div>
+        <div>${school}</div>
+        <div>${province}</div>
+    `;
+    return true;
+}
+
+function readRegistry() {
+    try {
+        const saved = localStorage.getItem(registryKey);
+        const parsed = saved ? JSON.parse(saved) : [];
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+        console.log('Unable to read registry', error);
+        return [];
+    }
+}
+
+function saveRegistry(registry) {
+    localStorage.setItem(registryKey, JSON.stringify(registry));
+}
+
+function normalizeText(value) {
+    return (value || '').toString().trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+function findMatchingChildIndex(registry, child, parent) {
+    const fullName = normalizeText(child.fullName || '');
+    const schoolName = normalizeText(parent.schoolName || parent.schoolSearch || '');
+    const grade = normalizeText(child.grade || '');
+    const email = (child.email || '').trim().toLowerCase();
+
+    return registry.findIndex((user) => {
+        const userEmail = (user.email || '').trim().toLowerCase();
+        if (email && userEmail && userEmail === email) {
+            return true;
+        }
+
+        const userFullName = normalizeText(user.fullName || '');
+        const userSchool = normalizeText(user.schoolName || '');
+        const userGrade = normalizeText(user.grade || '');
+        const sameName = Boolean(fullName && userFullName && fullName === userFullName);
+        const sameSchool = Boolean(schoolName && userSchool && schoolName === userSchool);
+        const sameGrade = !grade || !userGrade || grade === userGrade;
+        return sameName && sameSchool && sameGrade;
+    });
+}
+
+function upsertChildEntry(registry, child, parent) {
+    const fullName = (child.fullName || '').trim();
+    const existingIndex = findMatchingChildIndex(registry, child, parent);
+
+    if (existingIndex >= 0) {
+        const existing = registry[existingIndex];
+        registry[existingIndex] = {
+            ...existing,
+            firstName: existing.firstName || fullName.split(/\s+/)[0] || '',
+            lastName: existing.lastName || fullName.split(/\s+/).slice(1).join(' ') || '',
+            fullName: fullName || existing.fullName || '',
+            role: 'Student',
+            grade: child.grade || existing.grade || '',
+            schoolName: parent.schoolName || parent.schoolSearch || existing.schoolName || '',
+            province: parent.province || existing.province || '',
+            email: existing.email || child.email || '',
+            phone: existing.phone || child.phone || '',
+            parentEmail: (parent.email || '').trim().toLowerCase(),
+            parentName: parent.fullName || existing.parentName || '',
+            linkedChild: true
+        };
+        return;
+    }
+
+    const entry = {
+        id: `${(parent.email || '').trim().toLowerCase()}-${fullName}`,
+        firstName: fullName.split(/\s+/)[0] || '',
+        lastName: fullName.split(/\s+/).slice(1).join(' ') || '',
+        fullName: fullName,
+        role: 'Student',
+        grade: child.grade || '',
+        children: [],
+        province: parent.province || '',
+        schoolName: parent.schoolName || parent.schoolSearch || '',
+        email: child.email || '',
+        phone: child.phone || '',
+        parentEmail: (parent.email || '').trim().toLowerCase(),
+        parentName: parent.fullName || '',
+        linkedChild: true
+    };
+
+    registry.push(entry);
+}
+
+function buildChildrenFromForm() {
+    const rows = Array.from(childList.querySelectorAll('.child-row'));
+    return rows.map((row) => ({
+        fullName: row.querySelector('.child-name').value.trim(),
+        grade: row.querySelector('.child-grade').value,
+        email: row.querySelector('.child-email').value.trim(),
+        phone: row.querySelector('.child-phone').value.trim()
+    })).filter((child) => child.fullName);
+}
+
+function addChildRow() {
+    childList.appendChild(createChildRow());
+}
+
+addChildBtn.addEventListener('click', addChildRow);
+
+form.addEventListener('submit', function(event) {
+    event.preventDefault();
+    const parent = getParentProfile();
+    if (!parent) {
+        alert('Please create your parent profile first.');
+        window.location.replace('create-profile.html');
+        return;
+    }
+
+    const children = buildChildrenFromForm();
+    if (!children.length) {
+        alert('Child information is required. Please enter the full name and grade for at least one child.');
+        return;
+    }
+
+    const missingGrade = children.some((child) => !child.grade);
+    if (missingGrade) {
+        alert('Please select a grade for each child.');
+        return;
+    }
+
+    const registry = readRegistry();
+    children.forEach((child) => upsertChildEntry(registry, child, parent));
+    saveRegistry(registry);
+
+    const savedParent = { ...parent, children: children.map((child) => child.fullName) };
+    localStorage.setItem(storageKey, JSON.stringify(savedParent));
+    window.location.replace('profile-success.html');
+});
+
+function loadSavedChildRows() {
+    const parent = getParentProfile();
+    const savedNames = parent && Array.isArray(parent.children) ? parent.children : [];
+    if (!savedNames.length) return false;
+    const registry = readRegistry();
+    savedNames.forEach((name) => {
+        const match = registry.find((user) => normalizeText(user.fullName) === normalizeText(name));
+        childList.appendChild(createChildRow({
+            fullName: name,
+            grade: match ? match.grade : '',
+            email: match ? match.email : '',
+            phone: match ? match.phone : ''
+        }));
+    });
+    return true;
+}
+
+if (!loadParentSummary()) {
+    window.location.replace('create-profile.html');
+} else if (!loadSavedChildRows()) {
+    addChildRow();
+}
+</script>
+</body>
+</html>
