@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Timetable</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif; }
+body {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f3f7ff 0%, #eef4fb 100%);
+  color: #173b5e;
+  padding: 24px 16px 110px;
+}
+body.dark-mode {
+  background: linear-gradient(135deg, #0d1a2b 0%, #091420 100%);
+  color: #c8d8e8;
+}
+.container { max-width: 980px; margin: 0 auto; display: grid; gap: 18px; }
+.card {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 20px;
+}
+body.dark-mode .card { background: transparent; border-color: transparent; color:#c8d8e8; }
+.header {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.title { font-size: 28px; font-weight: 700; }
+.subtitle { color: #5d6f80; font-size: 14px; }
+body.dark-mode .subtitle { color: #7a9dba; }
+.form-grid { display: grid; gap: 16px; }
+label { display: block; margin-bottom: 8px; font-weight: 700; font-size: 14px; }
+input, textarea, select {
+  width: 100%; border: 1px solid rgba(23,59,94,0.15); border-radius: 12px; padding: 12px 14px; font-size: 15px; background: #fbfdff; color: #173b5e;
+}
+body.dark-mode input, body.dark-mode textarea, body.dark-mode select {
+  background: #1a2e44; border-color: rgba(200,216,232,0.2); color: #c8d8e8;
+}
+textarea { min-height: 120px; resize: vertical; }
+.btn-row { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+button {
+  border: none; border-radius: 12px; padding: 11px 16px; font-weight: 700; cursor: pointer; background: #173b5e; color: #fff; box-shadow: 0 8px 16px rgba(13,41,68,0.14);
+}
+button.secondary { background: #f4f7fb; color: #173b5e; box-shadow: none; border: 1px solid rgba(23,59,94,0.10); }
+body.dark-mode button.secondary { background:#1a2e44; color:#c8d8e8; border-color: rgba(200,216,232,0.12); }
+.timetable-list { display: grid; gap: 12px; }
+.timetable-item {
+  background: transparent; border: none; border-radius: 0; padding: 16px;
+}
+body.dark-mode .timetable-item { background: transparent; border-color: transparent; }
+.timetable-item h3 { font-size: 18px; margin-bottom: 6px; }
+.timetable-meta { color: #5d6f80; font-size: 13px; }
+body.dark-mode .timetable-meta { color: #7a9dba; }
+.timetable-item p { color: #314a62; line-height: 1.6; margin-top: 10px; }
+body.dark-mode .timetable-item p { color: #d2dded; }
+.empty { padding: 24px; border: none; border-radius: 0; text-align: center; color: #5d6f80; background: transparent; }
+body.dark-mode .empty { color: #7a9dba; background: transparent; }
+.delete-btn {
+  margin-top: 10px; background: #f4f7fb; color: #b03a3a; border: 1px solid rgba(176,58,58,0.2); box-shadow: none; font-size: 13px; padding: 8px 14px;
+}
+body.dark-mode .delete-btn { background: #1a2e44; color: #e08a8a; border-color: rgba(224,138,138,0.2); }
+.bottom-tab-bar{
+    position:fixed;left:50%;bottom:18px;transform:translateX(-50%);width:min(480px, calc(100% - 26px));display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-radius:999px;background:rgba(255,255,255,0.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(23,59,94,0.12);box-shadow:0 18px 35px rgba(13,41,68,0.14);z-index:1000;
+}
+body.dark-mode .bottom-tab-bar{background:rgba(19,36,54,0.92);border-color:rgba(200,216,232,0.12);}
+.tab-btn{
+    flex:1;display:grid;place-items:center;width:56px;height:56px;border:none;background:transparent;color:#173b5e;border-radius:50%;text-decoration:none;font-size:28px;cursor:pointer;transition:all 0.2s ease;
+}
+.tab-btn:hover{background:rgba(23,59,94,0.07);transform:translateY(-1px);}
+.tab-btn.active{background:linear-gradient(135deg,#173b5e,#3a79b8);color:#fff;box-shadow:0 10px 22px rgba(23,59,94,0.20);}
+body.dark-mode .tab-btn{color:#c8d8e8;}
+body.dark-mode .tab-btn.active{background:linear-gradient(135deg,#1e4a76,#2a6fa8);}
+.file-tab-btn { font-size: 30px; }
+@media (max-width: 620px) {
+  body { padding: 16px 12px 110px; }
+  .card { padding: 16px; border-radius: 0; }
+  .header { flex-direction: column; align-items: flex-start; }
+  .title { font-size: 24px; }
+  .btn-row { justify-content: stretch; }
+  .btn-row button { width: 100%; }
+}
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="card header">
+      <div>
+        <div class="title">Timetable</div>
+        <div class="subtitle">School schedule and class plan</div>
+      </div>
+      <a href="admin-feed.html" style="color:inherit; text-decoration:none; font-weight:700;">← Back</a>
+    </div>
+
+    <div class="card" id="adminTimetableCard" style="display:none;">
+      <form id="timetableForm" class="form-grid">
+        <div>
+          <label for="timetableGrade">Grade</label>
+          <select id="timetableGrade">
+            <option value="Grade 8">Grade 8</option>
+            <option value="Grade 9">Grade 9</option>
+            <option value="Grade 10">Grade 10</option>
+            <option value="Grade 11">Grade 11</option>
+            <option value="Grade 12">Grade 12</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="timetableClass">Class</label>
+          <select id="timetableClass"></select>
+        </div>
+
+        <input type="file" id="timetablePdf" accept=".pdf,application/pdf" style="display:none;" />
+
+        <div class="btn-row">
+          <button type="button" class="secondary" id="addTimetableBtn">Add</button>
+          <button type="submit" id="saveTimetableBtn">Save timetable</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="title" style="font-size:20px; margin-bottom:12px;" id="currentTimetableTitle">Current timetable</div>
+      <div id="timetableList" class="timetable-list"></div>
+    </div>
+  </div>
+
+  <div class="bottom-tab-bar" id="bottomTabBar" aria-label="Primary navigation"></div>
+
+<script>
+const profileStorageKey = 'schoolProfileData';
+const timetableStorageKey = 'schoolTimetable';
+const savedProfile = JSON.parse(localStorage.getItem(profileStorageKey) || '{}');
+const currentRole = (savedProfile.role || '').toString().trim().toLowerCase();
+const adminCard = document.getElementById('adminTimetableCard');
+const timetableList = document.getElementById('timetableList');
+const timetableForm = document.getElementById('timetableForm');
+const addTimetableBtn = document.getElementById('addTimetableBtn');
+const timetablePdfInput = document.getElementById('timetablePdf');
+const bottomBar = document.getElementById('bottomTabBar');
+const currentTimetableTitle = document.getElementById('currentTimetableTitle');
+const gradeSelect = document.getElementById('timetableGrade');
+const classSelect = document.getElementById('timetableClass');
+const classFormatStorageKey = 'schoolClassFormat';
+let pendingEntries = [];
+
+function loadDarkMode() {
+  const isDark = localStorage.getItem('schoolDarkMode') === 'true';
+  document.body.classList.toggle('dark-mode', isDark);
+}
+
+function isAdminRole() {
+  return currentRole === 'administrator' || currentRole === 'admin';
+}
+
+if (isAdminRole()) {
+  adminCard.style.display = 'block';
+}
+
+if (currentRole === 'student' && currentTimetableTitle) {
+  currentTimetableTitle.textContent = 'My timetable (' + (savedProfile.grade || 'your class') + ')';
+}
+
+function getGradeNumber(grade) {
+  const match = (grade || '').toString().match(/\d+/);
+  return match ? match[0] : '';
+}
+
+function getClassFormat() {
+  return localStorage.getItem(classFormatStorageKey) || 'number';
+}
+
+function buildClassCode() {
+  const gradeNum = getGradeNumber(gradeSelect.value);
+  const format = getClassFormat();
+  const suffix = classSelect.value;
+  if (format === 'letter') {
+    return gradeNum + suffix;
+  }
+  return gradeNum + '.' + suffix;
+}
+
+function populateClassOptions() {
+  const format = getClassFormat();
+  const options = format === 'letter'
+    ? ['A', 'B', 'C', 'D', 'E', 'F']
+    : ['1', '2', '3', '4', '5', '6'];
+  classSelect.innerHTML = options.map(function(opt) {
+    return '<option value="' + opt + '">' + opt + '</option>';
+  }).join('');
+}
+
+if (gradeSelect && classSelect) {
+  populateClassOptions();
+  gradeSelect.addEventListener('change', renderTimetableList);
+  classSelect.addEventListener('change', renderTimetableList);
+}
+
+function readTimetable() {
+  try {
+    const raw = localStorage.getItem(timetableStorageKey);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function saveTimetable(entries) {
+  localStorage.setItem(timetableStorageKey, JSON.stringify(entries));
+}
+
+function normalizeSavedIds() {
+  const entries = readTimetable();
+  let changed = false;
+  entries.forEach(function(entry, index) {
+    if (!entry.id) {
+      entry.id = 'saved-' + index + '-' + Date.now();
+      changed = true;
+    }
+  });
+  if (changed) {
+    saveTimetable(entries);
+  }
+}
+
+function deleteTimetableEntry(id) {
+  const pendingIndex = pendingEntries.findIndex(function(entry) {
+    return entry.id === id;
+  });
+  if (pendingIndex >= 0) {
+    pendingEntries.splice(pendingIndex, 1);
+    renderTimetableList();
+    return;
+  }
+  const savedEntries = readTimetable().filter(function(entry) {
+    return entry.id !== id;
+  });
+  saveTimetable(savedEntries);
+  renderTimetableList();
+}
+
+let pressTimer = null;
+
+function clearPressTimer() {
+  if (pressTimer) {
+    clearTimeout(pressTimer);
+    pressTimer = null;
+  }
+}
+
+function revealDeleteForItem(item) {
+  var btn = item.querySelector('.delete-btn');
+  if (!btn) return;
+  var willShow = btn.style.display === 'none';
+  var allItems = timetableList.querySelectorAll('.timetable-item');
+  allItems.forEach(function(other) {
+    var otherBtn = other.querySelector('.delete-btn');
+    if (otherBtn) otherBtn.style.display = 'none';
+  });
+  btn.style.display = willShow ? 'inline-block' : 'none';
+}
+
+function handlePressStart(e) {
+  var item = e.target.closest ? e.target.closest('.timetable-item') : null;
+  if (!item || !isAdminRole()) return;
+  clearPressTimer();
+  pressTimer = setTimeout(function() {
+    revealDeleteForItem(item);
+  }, 600);
+}
+
+if (isAdminRole() && timetableList) {
+  timetableList.addEventListener('touchstart', handlePressStart, { passive: true });
+  timetableList.addEventListener('touchend', clearPressTimer);
+  timetableList.addEventListener('touchmove', clearPressTimer);
+  timetableList.addEventListener('mousedown', handlePressStart);
+  timetableList.addEventListener('mouseup', clearPressTimer);
+  timetableList.addEventListener('mouseleave', clearPressTimer);
+  timetableList.addEventListener('contextmenu', function(e) {
+    var item = e.target.closest ? e.target.closest('.timetable-item') : null;
+    if (!item) return;
+    e.preventDefault();
+    revealDeleteForItem(item);
+  });
+}
+
+function compareEntriesAscending(a, b) {
+  const gradeA = parseInt((a.grade || '').toString().match(/\d+/), 10) || 0;
+  const gradeB = parseInt((b.grade || '').toString().match(/\d+/), 10) || 0;
+  if (gradeA !== gradeB) return gradeA - gradeB;
+  const classA = (a.className || '').toString();
+  const classB = (b.className || '').toString();
+  return classA.localeCompare(classB, undefined, { numeric: true });
+}
+
+function renderTimetableList() {
+  normalizeSavedIds();
+  const savedEntries = readTimetable();
+  const allEntries = [...savedEntries, ...pendingEntries];
+  const isStudent = currentRole === 'student';
+  const studentGrade = (savedProfile.grade || '').toString().trim().toLowerCase();
+  const isAdmin = isAdminRole();
+  const selectedGrade = gradeSelect ? gradeSelect.value : '';
+
+  const visibleEntries = allEntries.filter(function(entry) {
+    if (isStudent) {
+      return (entry.grade || '').toString().trim().toLowerCase() === studentGrade;
+    }
+    if (isAdmin) {
+      const entryGrade = (entry.grade || '').toString().trim().toLowerCase();
+      return entryGrade === selectedGrade.toLowerCase();
+    }
+    return true;
+  });
+
+  visibleEntries.sort(compareEntriesAscending);
+
+  if (!visibleEntries.length) {
+    timetableList.innerHTML = isStudent
+      ? '<div class="empty">No timetable has been posted for ' + (savedProfile.grade || 'your class') + ' yet.</div>'
+      : '<div class="empty">No timetables have been posted for ' + selectedGrade + ' yet.</div>';
+    return;
+  }
+
+  timetableList.innerHTML = visibleEntries.map(function(entry) {
+    const heading = entry.className || entry.title || entry.grade || 'Timetable entry';
+    const metaParts = [];
+    if (entry.className) metaParts.push(entry.className);
+    if (entry.day) metaParts.push(entry.day);
+    if (entry.time) metaParts.push(entry.time);
+    const meta = metaParts.filter(Boolean).join(' • ');
+    const pendingLabel = entry._pending ? ' <span style="font-size:12px; font-weight:600; color:#3a79b8;">(Pending)</span>' : '';
+    const pdfHref = entry.pdfUrl || entry.pdfData;
+    const pdfFileName = ((entry.className || entry.grade || 'timetable').toString().replace(/[^a-z0-9.\-]+/gi, '-')) + '.pdf';
+    const pdfLink = entry.pdfData
+      ? '<p><a href="' + pdfHref + '" target="_blank" rel="noopener" style="color:#3a79b8; font-weight:600;">Timetable</a>' +
+        ' &nbsp;|&nbsp; <a href="' + pdfHref + '" download="' + pdfFileName + '" style="color:#3a79b8; font-weight:600;">Download</a></p>'
+      : (entry.notes ? '<p>' + entry.notes + '</p>' : '');
+    const deleteBtn = isAdminRole()
+      ? '<button type="button" class="delete-btn" style="display:none;" onclick="deleteTimetableEntry(\'' + entry.id + '\')">Delete</button>'
+      : '';
+    return '' +
+      '<div class="timetable-item">' +
+        '<h3>' + heading + pendingLabel + '</h3>' +
+        (meta ? '<div class="timetable-meta">' + meta + '</div>' : '') +
+        pdfLink +
+        deleteBtn +
+      '</div>';
+  }).join('');
+}
+
+if (addTimetableBtn && timetablePdfInput) {
+  addTimetableBtn.addEventListener('click', function() {
+    timetablePdfInput.value = '';
+    timetablePdfInput.click();
+  });
+
+  timetablePdfInput.addEventListener('change', function() {
+    const grade = gradeSelect.value;
+    const className = buildClassCode();
+    const file = timetablePdfInput.files[0];
+    if (!file) return;
+
+    // Only one timetable allowed per grade/class.
+    // To update, the admin must delete the existing one first.
+    const duplicateExists = readTimetable().some(function(entry) {
+      return (entry.grade || '').toString().trim().toLowerCase() === grade.toLowerCase() &&
+             (entry.className || '').toString().trim().toLowerCase() === className.toLowerCase();
+    }) || pendingEntries.some(function(entry) {
+      return (entry.grade || '').toString().trim().toLowerCase() === grade.toLowerCase() &&
+             (entry.className || '').toString().trim().toLowerCase() === className.toLowerCase();
+    });
+    if (duplicateExists) {
+      alert('A timetable already exists for ' + className + '. Delete the old one first, then add the updated timetable.');
+      return;
+    }
+    if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+      alert('Please select a valid PDF file.');
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      alert('The PDF file is too large. Please choose a file under 2 MB.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      pendingEntries.push({
+        id: 'pending-' + Date.now() + '-' + Math.floor(Math.random() * 100000),
+        grade: grade,
+        className: className,
+        pdfName: file.name,
+        pdfData: e.target.result,
+        _pending: true
+      });
+      renderTimetableList();
+      timetableForm.reset();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+if (timetableForm) {
+  timetableForm.addEventListener('submit', function(event) {
+    event.preventDefault();
+    if (!pendingEntries.length) {
+      alert('Please add a timetable PDF first.');
+      return;
+    }
+    const entries = readTimetable();
+    entries.push(...pendingEntries.map(function(entry) {
+      const copy = { ...entry };
+      delete copy._pending;
+      return copy;
+    }));
+    try {
+      saveTimetable(entries);
+    } catch (error) {
+      alert('The timetable could not be saved. The PDF files may be too large for browser storage.');
+      return;
+    }
+    pendingEntries = [];
+    renderTimetableList();
+    alert('Timetable saved.');
+  });
+}
+
+loadDarkMode();
+renderTimetableList();
+</script>
+<script src="tab-bar.js"></script>
+</body>
+</html>
