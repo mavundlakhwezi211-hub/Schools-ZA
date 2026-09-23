@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verification</title>
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            -webkit-font-smoothing:antialiased;
+            -moz-osx-font-smoothing:grayscale;
+            font-feature-settings:"liga" 1;
+        }
+
+        body{
+            margin:0;
+            min-height:100vh;
+            background:#f9f9f9;
+            color:#111;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            padding:20px;
+            overflow-x:hidden;
+        }
+
+        .verification-container{
+            width:100%;
+            max-width:520px;
+            background:transparent;
+            border-radius:0;
+            box-shadow:none;
+            padding:0;
+            text-align:center;
+        }
+
+        h1{
+            text-align:center;
+            font-size:clamp(2rem,5vw,2.7rem);
+            line-height:1.15;
+            color:#111;
+            margin-bottom:14px;
+        }
+
+        .subtitle{
+            text-align:center;
+            color:#666;
+            line-height:1.6;
+            margin-bottom:30px;
+            font-size:clamp(1rem,2.5vw,1.15rem);
+        }
+
+        .code-inputs{
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap:10px;
+            margin-bottom:20px;
+        }
+
+        .code-input{
+            width:52px;
+            height:56px;
+            font-size:24px;
+            font-weight:600;
+            text-align:center;
+            border:1px solid #dcdcdc;
+            border-radius:8px;
+            outline:none;
+            transition:all 0.2s ease;
+        }
+
+        .code-input:focus{
+            border-color:#000;
+            box-shadow:0 0 0 2px rgba(0,0,0,0.05);
+        }
+
+        .divider{
+            color:#aaa;
+            font-size:18px;
+            padding:0 4px;
+        }
+
+        .resend-btn{
+            background:none;
+            border:none;
+            color:#111;
+            text-decoration:underline;
+            font-size:13px;
+            cursor:pointer;
+            margin-bottom:24px;
+            display:inline-block;
+        }
+
+        .continue-btn{
+            width:100%;
+            padding:17px;
+            border-radius:14px;
+            font-size:18px;
+            font-weight:600;
+            border:none;
+            cursor:not-allowed;
+            background:#e5e5e5;
+            color:#a1a1a1;
+            transition:background 0.2s ease, transform 0.2s ease;
+        }
+
+        .continue-btn.active{
+            background:linear-gradient(135deg, #173b5e 0%, #2a6bb2 100%);
+            color:#fff;
+            cursor:pointer;
+            box-shadow:none;
+        }
+
+        .continue-btn.active:hover{
+            background:linear-gradient(135deg, #0f2a45 0%, #20558e 100%);
+            transform:translateY(-1px);
+        }
+
+        .status-message{
+            min-height:20px;
+            margin-top:14px;
+            color:#666;
+            font-size:13px;
+        }
+
+        @media (max-width: 420px){
+            body{
+                padding:14px;
+            }
+
+            .verification-container{
+                padding:0 4px;
+            }
+
+            .code-inputs{
+                gap:8px;
+            }
+
+            .code-input{
+                width:48px;
+                height:52px;
+                font-size:22px;
+            }
+
+            h1{font-size:2.15rem;}
+            .subtitle{font-size:1rem;}
+            .continue-btn{font-size:17px;padding:16px;}
+        }
+
+        @media (max-width: 320px){
+            .code-input{
+                width:40px;
+                height:46px;
+                font-size:20px;
+            }
+
+            h1{font-size:1.9rem;}
+            .subtitle{font-size:0.95rem;}
+        }
+    </style>
+</head>
+<body>
+    <div class="verification-container">
+        <h1>Verify Your Email Address</h1>
+        <p class="subtitle">Please enter the 6-digit code we sent to<br><strong id="emailBox">you@example.com</strong></p>
+
+        <div class="code-inputs" aria-label="Verification code">
+            <input class="code-input" type="text" maxlength="1" pattern="\d*" inputmode="numeric" aria-label="Digit 1" autofocus>
+            <input class="code-input" type="text" maxlength="1" pattern="\d*" inputmode="numeric" aria-label="Digit 2">
+            <input class="code-input" type="text" maxlength="1" pattern="\d*" inputmode="numeric" aria-label="Digit 3">
+            <span class="divider" aria-hidden="true">—</span>
+            <input class="code-input" type="text" maxlength="1" pattern="\d*" inputmode="numeric" aria-label="Digit 4">
+            <input class="code-input" type="text" maxlength="1" pattern="\d*" inputmode="numeric" aria-label="Digit 5">
+            <input class="code-input" type="text" maxlength="1" pattern="\d*" inputmode="numeric" aria-label="Digit 6">
+        </div>
+
+        <button class="resend-btn" id="resendBtn" type="button">Send Again</button>
+        <button class="continue-btn" id="continueBtn" type="button" disabled>Continue</button>
+        <div class="status-message" id="statusMessage" aria-live="polite"></div>
+    </div>
+
+    <script>
+        const RESEND_API_KEY = 're_64J8Y2pm_BRG7YrmLCdu4a6JbgEChQXkz';
+        const profileData = JSON.parse(localStorage.getItem('schoolProfileData') || '{}');
+        const emailBox = document.getElementById('emailBox');
+        const statusMessage = document.getElementById('statusMessage');
+        const continueBtn = document.getElementById('continueBtn');
+        const resendBtn = document.getElementById('resendBtn');
+        const inputs = [...document.querySelectorAll('.code-input')];
+        const userEmail = (profileData.email || 'you@example.com').trim();
+        let currentOtp = '';
+
+        emailBox.textContent = userEmail;
+
+        function updateStatus(message, isError = false) {
+            statusMessage.innerHTML = message;
+            statusMessage.style.color = isError ? '#b42318' : '#5d6f80';
+        }
+
+        function readOtp() {
+            return inputs.map((input) => input.value).join('');
+        }
+
+        function checkCompletion() {
+            const complete = inputs.every((input) => input.value.length === 1);
+            continueBtn.disabled = !complete;
+            continueBtn.classList.toggle('active', complete);
+        }
+
+        function setOtpInput(value) {
+            inputs.forEach((input, index) => {
+                input.value = value[index] || '';
+            });
+            checkCompletion();
+        }
+
+        function generateOtp() {
+            return Math.floor(100000 + Math.random() * 900000).toString();
+        }
+
+        async function sendOtpEmail(email, otp) {
+            const response = await fetch('https://api.resend.com/emails', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${RESEND_API_KEY}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    from: 'School ZA <onboarding@resend.dev>',
+                    to: [email],
+                    subject: 'Your School ZA verification code',
+                    html: `
+                        <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px; border: 1px solid #e5e7eb; border-radius: 12px; background: #f8fafc; color: #173b5e;">
+                            <h2 style="margin-top: 0;">Email Verification</h2>
+                            <p>Your verification code is:</p>
+                            <div style="font-size: 32px; font-weight: 700; letter-spacing: 8px; padding: 18px 0; color: #173b5e;">${otp}</div>
+                            <p style="margin-bottom: 0;">Use this code to complete your email verification.</p>
+                        </div>
+                    `
+                })
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || 'Failed to send verification email');
+            }
+
+            return true;
+        }
+
+        async function triggerOtpSend(isResend = false) {
+            const otp = generateOtp();
+            currentOtp = otp;
+            localStorage.setItem('schoolOtpCode', otp);
+            localStorage.setItem('otpSentAt', Date.now().toString());
+
+            continueBtn.disabled = true;
+            resendBtn.disabled = true;
+            updateStatus(isResend ? 'Sending a new verification code...' : 'Sending verification code...');
+
+            try {
+                await sendOtpEmail(userEmail, otp);
+                updateStatus(isResend ? 'A new verification code has been sent.' : '');
+                resendBtn.disabled = false;
+                checkCompletion();
+            } catch (error) {
+                console.error(error);
+                updateStatus('We could not send the verification email. Please try again.', true);
+                resendBtn.disabled = false;
+                checkCompletion();
+            }
+        }
+
+        async function verifyCode() {
+            const code = readOtp();
+            const savedOtp = localStorage.getItem('schoolOtpCode') || currentOtp;
+
+            if (code.length !== 6) {
+                updateStatus('Please enter the full 6-digit code.', true);
+                return;
+            }
+
+            if (code !== savedOtp) {
+                updateStatus('Incorrect verification code. Please try again.', true);
+                return;
+            }
+
+            localStorage.setItem('emailVerified', 'true');
+            updateStatus('Email verified successfully. Redirecting...');
+            setTimeout(() => {
+                window.location.href = 'profile-success.html';
+            }, 800);
+        }
+
+        inputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                const value = e.target.value.replace(/\D/g, '').slice(0, 1);
+                e.target.value = value;
+
+                if (value && index < inputs.length - 1) {
+                    inputs[index + 1].focus();
+                }
+                checkCompletion();
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !input.value && index > 0) {
+                    inputs[index - 1].focus();
+                }
+            });
+
+            input.addEventListener('paste', (e) => {
+                const pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, inputs.length);
+                if (!pasted) return;
+                e.preventDefault();
+                pasted.split('').forEach((char, i) => {
+                    if (inputs[i]) inputs[i].value = char;
+                });
+                const nextIndex = Math.min(pasted.length, inputs.length - 1);
+                inputs[nextIndex].focus();
+                checkCompletion();
+            });
+        });
+
+        continueBtn.addEventListener('click', verifyCode);
+        resendBtn.addEventListener('click', () => triggerOtpSend(true));
+
+        triggerOtpSend(false);
+    </script>
+</body>
+</html>
