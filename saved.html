@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Saved | UrSKOOL</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;-webkit-font-smoothing:antialiased;}
+/* Flat layout - no rounded rectangles, no cards, everything aligned to the left edge */
+body{min-height:100vh;padding:24px 0 56px;background:linear-gradient(135deg,#f3f7ff 0%,#eef4fb 100%);color:#173b5e;text-align:left;}
+body.dark-mode{background:linear-gradient(135deg,#0d1a2b 0%,#091420 100%);color:#c8d8e8;}
+.page{width:100%;max-width:760px;margin:0;padding:0 clamp(12px,4vw,28px);display:grid;gap:14px;justify-items:start;text-align:left;}
+.top-bar{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;width:100%;}
+/* ===== Back button: circle + chevron (scaled to the app, colour follows the page text colour) ===== */
+.back-btn{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;flex:0 0 auto;border:2.5px solid currentColor;border-radius:50%;padding:0;background:transparent;color:inherit;cursor:pointer;text-decoration:none;line-height:1;transition:transform .2s ease,opacity .2s ease;}
+.back-btn .arrow{display:block;width:11px;height:11px;border-top:2.5px solid currentColor;border-left:2.5px solid currentColor;transform:rotate(-45deg);margin-left:4px;}
+.back-btn:hover{transform:scale(1.06);opacity:.8;}
+.back-btn:focus-visible{outline:2px solid #3a79b8;outline-offset:3px;}
+@media (max-width:540px){.back-btn{width:34px;height:34px;border-width:2px;}.back-btn .arrow{width:9px;height:9px;border-top-width:2px;border-left-width:2px;margin-left:3px;}}
+.logo{width:140px;height:auto;display:block;}
+h1{font-size:clamp(26px,4vw,32px);font-weight:800;}
+.meta{font-size:13px;font-weight:600;color:#5d6f80;}
+body.dark-mode .meta{color:#7a9dba;}
+.saved-list{width:100%;display:grid;gap:0;}
+.saved-item{width:100%;display:grid;gap:10px;padding:18px 0;border:0;border-bottom:1px solid rgba(23,59,94,0.12);background:transparent;border-radius:0;text-align:left;}
+body.dark-mode .saved-item{border-bottom-color:rgba(200,216,232,0.12);}
+.saved-head{display:flex;align-items:center;gap:12px;}
+.avatar-square{width:40px;height:40px;flex:0 0 auto;display:grid;place-items:center;background:linear-gradient(135deg,#173b5e,#3a79b8);color:#fff;font-size:18px;font-weight:700;}
+.avatar-square.has-image{background-size:cover;background-position:center;background-repeat:no-repeat;color:transparent;}
+.saved-author{font-size:16px;font-weight:700;}
+.saved-date{font-size:13px;color:#5d6f80;margin-top:2px;}
+body.dark-mode .saved-date{color:#7a9dba;}
+.saved-text{font-size:15px;line-height:1.7;color:#314a62;white-space:pre-wrap;word-break:break-word;}
+body.dark-mode .saved-text{color:#c8d8e8;}
+.saved-image{width:100%;max-height:360px;object-fit:cover;display:block;border:1px solid rgba(23,59,94,0.12);}
+.saved-actions{display:flex;flex-wrap:wrap;gap:18px;align-items:center;}
+.saved-actions a,.saved-actions button{border:0;background:transparent;padding:0;font-size:14px;font-weight:700;text-decoration:none;cursor:pointer;font-family:inherit;line-height:1.4;}
+.open-link{color:#3a79b8;}
+.open-link:hover{text-decoration:underline;}
+body.dark-mode .open-link{color:#7db8e8;}
+.remove-btn{color:#b42318;}
+.remove-btn:hover{text-decoration:underline;}
+body.dark-mode .remove-btn{color:#f08072;}
+.empty{width:100%;padding:26px 0;display:grid;gap:10px;}
+.empty p{font-size:15px;line-height:1.7;color:#314a62;}
+body.dark-mode .empty p{color:#c8d8e8;}
+.link{color:#3a79b8;font-weight:600;text-decoration:none;}
+.link:hover{text-decoration:underline;}
+body.dark-mode .link{color:#7db8e8;}
+.foot{width:100%;margin-top:8px;font-size:12px;color:#5d6f80;display:grid;gap:6px;}
+body.dark-mode .foot{color:#7a9dba;}
+@media (max-width:540px){
+    h1{font-size:24px;}
+    .saved-item{padding:16px 0;}
+    .saved-text{font-size:14px;}
+}
+</style>
+</head>
+<body>
+<main class="page">
+    <div class="top-bar">
+        <a href="settings.html" class="back-btn" aria-label="Go back"><span class="arrow"></span></a>
+        <img id="pageLogo" class="logo" src="urskool-logo.png" alt="UrSKOOL logo" width="140">
+    </div>
+
+    <h1>Saved</h1>
+    <div class="meta" id="savedMeta">Loading saved posts&hellip;</div>
+
+    <div class="saved-list" id="savedList"></div>
+
+    <div class="foot" id="savedFoot">
+        <span>Go to the <a class="link" href="admin-feed.html">community feed</a> to save more posts &middot; <a class="link" href="settings.html">Settings</a></span>
+        <span>&copy; 2026 UrSKOOL. All rights reserved.</span>
+    </div>
+</main>
+
+<script>
+const feedStorageKey = 'schoolAdminFeed';
+const profileStorageKey = 'schoolProfileData';
+const savedProfile = JSON.parse(localStorage.getItem(profileStorageKey) || '{}');
+
+function isDarkMode(){
+    return localStorage.getItem('schoolDarkMode') === 'true';
+}
+
+// Same identity rules admin-feed.html uses when it stores post.savedBy
+function getBookmarkIds(){
+    const fullName = savedProfile.fullName || `${(savedProfile.firstName || '').trim()} ${(savedProfile.lastName || '').trim()}`.trim() || 'User';
+    const email = (savedProfile.email || '').trim().toLowerCase();
+    return [email, fullName, 'user:' + fullName].filter(Boolean);
+}
+
+function readPosts(){
+    try {
+        const stored = JSON.parse(localStorage.getItem(feedStorageKey) || '[]');
+        return Array.isArray(stored) ? stored : [];
+    } catch (error) {
+        console.log('Could not read feed data', error);
+        return [];
+    }
+}
+
+function getPostTime(post){
+    if (post.createdAt) {
+        const created = new Date(post.createdAt).getTime();
+        if (!Number.isNaN(created)) return created;
+    }
+    return /^\d+$/.test(post.id || '') ? Number(post.id) : 0;
+}
+
+function getPostDateLabel(post){
+    const time = getPostTime(post);
+    if (!time) return post.time || 'Date unavailable';
+    const date = new Date(time);
+    return Number.isNaN(date.getTime()) ? (post.time || 'Date unavailable') : date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function escapeHtml(value){
+    return (value || '').toString().replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+}
+
+// Match a saved post back to a registered user so their profile picture shows
+function getAuthorProfile(post){
+    try {
+        const registry = JSON.parse(localStorage.getItem('schoolUsersRegistry') || '[]');
+        if (!Array.isArray(registry)) return null;
+        const postEmail = (post.authorEmail || '').trim().toLowerCase();
+        const postAuthor = (post.author || '').trim().toLowerCase();
+        return registry.find((user) => {
+            const userEmail = (user.email || '').trim().toLowerCase();
+            const userName = (user.fullName || '').trim().toLowerCase();
+            return (postEmail && userEmail === postEmail) || (!postEmail && userName === postAuthor);
+        }) || null;
+    } catch (error) {
+        return null;
+    }
+}
+
+function getMySavedPosts(){
+    const ids = getBookmarkIds();
+    return readPosts()
+        .filter((post) => Array.isArray(post.savedBy) && post.savedBy.some((id) => ids.includes(id)))
+        .sort((a, b) => getPostTime(b) - getPostTime(a));
+}
+
+function renderSaved(){
+    const list = document.getElementById('savedList');
+    const meta = document.getElementById('savedMeta');
+    const foot = document.getElementById('savedFoot');
+    const posts = getMySavedPosts();
+    const hasPosts = posts.length > 0;
+
+    // Nothing saved: the page keeps only the heading and "Nothing saved yet.", so the count
+    // line and the footer text are taken out of the layout instead of just reading zero.
+    meta.textContent = hasPosts ? (posts.length === 1 ? '1 saved post' : `${posts.length} saved posts`) : '';
+    meta.style.display = hasPosts ? '' : 'none';
+    if (foot) foot.style.display = hasPosts ? '' : 'none';
+
+    if (!hasPosts) {
+        list.innerHTML = '<div class="empty"><p><strong>Nothing saved yet.</strong></p></div>';
+        return;
+    }
+
+    list.innerHTML = posts.map((post) => {
+        const author = post.author || 'Administrator';
+        const authorProfile = getAuthorProfile(post);
+        const hasImage = !!(authorProfile && authorProfile.profileImage);
+        const avatarStyle = hasImage ? ` style="background-image:url('${authorProfile.profileImage}')"` : '';
+        const text = escapeHtml(post.text || '');
+        const postId = escapeHtml(post.id);
+        return `
+            <article class="saved-item" id="saved-${postId}">
+                <div class="saved-head">
+                    <div class="avatar-square${hasImage ? ' has-image' : ''}"${avatarStyle}>${hasImage ? '' : escapeHtml(author.charAt(0).toUpperCase())}</div>
+                    <div>
+                        <div class="saved-author">${escapeHtml(author)}</div>
+                        <div class="saved-date">${getPostDateLabel(post)}</div>
+                    </div>
+                </div>
+                ${text ? `<div class="saved-text">${text}</div>` : '<div class="saved-text"><em>No text &mdash; image only.</em></div>'}
+                ${post.image ? `<img class="saved-image" src="${post.image}" alt="Saved post image">` : ''}
+                <div class="saved-actions">
+                    <a class="open-link" href="admin-feed.html#post-${postId}">Open post</a>
+                    <button type="button" class="remove-btn" onclick="removeBookmark('${postId}')">Remove bookmark</button>
+                </div>
+            </article>`;
+    }).join('');
+}
+
+function removeBookmark(postId){
+    const posts = readPosts();
+    const post = posts.find((item) => item.id === postId);
+    if (!post) { renderSaved(); return; }
+    const ids = getBookmarkIds();
+    post.savedBy = (Array.isArray(post.savedBy) ? post.savedBy : []).filter((id) => !ids.includes(id));
+    localStorage.setItem(feedStorageKey, JSON.stringify(posts));
+    renderSaved();
+}
+
+document.body.classList.toggle('dark-mode', isDarkMode());
+document.getElementById('pageLogo').src = isDarkMode() ? 'urskool-logo-dark.png' : 'urskool-logo.png';
+renderSaved();
+window.addEventListener('storage', renderSaved);
+</script>
+</body>
+</html>
+

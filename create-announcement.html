@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create Announcement</title>
+<script src="api-client.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Roboto','Helvetica Neue',Arial,sans-serif;-webkit-font-smoothing:antialiased;}
+body{min-height:100vh;padding:clamp(16px,4vw,32px) clamp(12px,4vw,28px) 112px;background:linear-gradient(135deg,#f3f7ff 0%,#eef4fb 100%);color:#173b5e;}
+body.dark-mode{background:linear-gradient(135deg,#0d1a2b 0%,#091420 100%);color:#c8d8e8;}
+.container{width:100%;max-width:780px;margin:0 auto;display:grid;gap:clamp(16px,2.5vw,22px);}
+.header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
+.title{font-size:clamp(24px,4vw,30px);font-weight:700;}
+.subtitle{margin-top:6px;font-size:13px;color:#5d6f80;}
+body.dark-mode .subtitle,body.dark-mode .recipient-meta{color:#7a9dba;}
+.section{display:grid;gap:12px;max-width:680px;}
+label{font-size:13px;font-weight:700;color:#5d6f80;}
+body.dark-mode label{color:#9bb3cc;}
+textarea,input[type="search"]{width:100%;border:1px solid rgba(23,59,94,.16);border-radius:14px;padding:13px 14px;font-size:15px;color:#173b5e;outline:none;background:#fbfdff;}
+textarea{min-height:150px;resize:vertical;line-height:1.5;}
+textarea:focus,input[type="search"]:focus{border-color:#3a79b8;box-shadow:0 0 0 3px rgba(58,121,184,.14);}
+body.dark-mode textarea,body.dark-mode input[type="search"]{background:#1a2e44;border-color:rgba(200,216,232,.2);color:#c8d8e8;}
+body.dark-mode textarea::placeholder,body.dark-mode input[type="search"]::placeholder{color:#7a9dba;}
+.recipient-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.recipient-toolbar input{flex:1;min-width:220px;}
+.filter-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.filter-row label{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#173b5e;}
+body.dark-mode .filter-row label{color:#c8d8e8;}
+.grade-filters{display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+.grade-filters label{padding:8px 10px;border:1px solid rgba(23,59,94,.14);border-radius:999px;background:#fbfdff;cursor:pointer;}
+.grade-filters label:has(input:checked){background:#dceeff;border-color:#3a79b8;}
+.grade-filters input{accent-color:#173b5e;}
+body.dark-mode .grade-filters label{background:#1a2e44;border-color:rgba(200,216,232,.2);}
+body.dark-mode .grade-filters label:has(input:checked){background:#1e4a76;border-color:#2a6fa8;}
+.toolbar-button,button{border:0;border-radius:12px;padding:11px 15px;min-height:44px;font-weight:700;cursor:pointer;background:#173b5e;color:#fff;box-shadow:0 8px 16px rgba(13,41,68,.14);}
+button:hover{background:#0f2a45;}
+button.secondary{background:#f4f7fb;color:#173b5e;border:1px solid rgba(23,59,94,.1);box-shadow:none;}
+button.secondary:hover{background:#eaf2fa;}
+body.dark-mode button.secondary{background:#1a2e44;color:#c8d8e8;border-color:rgba(200,216,232,.15);}
+.saved-announcements-link{display:inline-flex;align-items:center;text-decoration:none;}
+.recipient-list{display:grid;gap:8px;max-height:360px;overflow:auto;}
+.recipient{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid rgba(23,59,94,.1);border-radius:14px;background:#fff;cursor:pointer;}
+.recipient:hover{background:#f7fbff;}
+body.dark-mode .recipient{background:#1a2e44;border-color:rgba(200,216,232,.12);}
+body.dark-mode .recipient:hover{background:#1e3a52;}
+.recipient input{width:18px;height:18px;accent-color:#173b5e;flex:0 0 auto;}
+.recipient-copy{min-width:0;flex:1;}
+.recipient-name{font-weight:700;font-size:14px;}
+.recipient-meta{margin-top:3px;font-size:12px;color:#5d6f80;overflow-wrap:anywhere;}
+.delivery-method{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.delivery-method label{display:flex;align-items:center;gap:7px;padding:9px 12px;border:1px solid rgba(23,59,94,.14);border-radius:12px;background:#fbfdff;cursor:pointer;}
+.delivery-method input{accent-color:#173b5e;}
+body.dark-mode .delivery-method label{background:#1a2e44;border-color:rgba(200,216,232,.2);}
+.empty{padding:18px;text-align:center;color:#5d6f80;border:1px dashed rgba(23,59,94,.2);border-radius:14px;}
+body.dark-mode .empty{color:#7a9dba;border-color:rgba(200,216,232,.2);}
+.actions{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;}
+.actions .saved-announcements-link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:11px 15px;border-radius:12px;font:700 14px Georgia,'Times New Roman',serif;background:#f4f7fb;color:#173b5e;border:1px solid rgba(23,59,94,.1);box-shadow:none;}
+.notice{display:none;color:#b42318;font-size:13px;font-weight:600;}
+.notice.visible{display:block;}
+body.dark-mode .notice{color:#f08072;}
+.saved-announcements-link{color:#173b5e;text-decoration:none;}
+body.dark-mode .actions .saved-announcements-link{background:#1a2e44;color:#c8d8e8;border-color:rgba(200,216,232,.15);}
+.saved-announcements-link:hover{background:#eaf2fa;}
+body.dark-mode .saved-announcements-link:hover{background:#1e3a52;}
+.bottom-tab-bar{position:fixed;left:50%;bottom:max(14px,2.5vh);transform:translateX(-50%);width:min(520px,calc(100% - 24px));display:flex;align-items:center;justify-content:space-between;gap:clamp(6px,2vw,12px);padding:clamp(8px,2vw,14px) clamp(10px,2.5vw,16px);border-radius:999px;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border:1px solid rgba(23,59,94,.12);box-shadow:0 18px 35px rgba(13,41,68,.14);z-index:1000;}
+body.dark-mode .bottom-tab-bar{background:rgba(19,36,54,.92);border-color:rgba(200,216,232,.12);}
+.tab-btn{flex:1;display:grid;place-items:center;width:clamp(48px,7vw,60px);height:clamp(48px,7vw,60px);border:0;background:transparent;color:#173b5e;border-radius:50%;text-decoration:none;font-size:clamp(23px,3.5vw,30px);cursor:pointer;}
+.tab-btn.active{background:linear-gradient(135deg,#173b5e,#3a79b8);color:#fff;}
+body.dark-mode .tab-btn{color:#c8d8e8;}
+body.dark-mode .tab-btn.active{background:linear-gradient(135deg,#1e4a76,#2a6fa8);}
+.access-denied{display:none;color:#b42318;font-weight:600;}
+@media(max-width:540px){.header{flex-direction:column}.recipient-toolbar input{min-width:100%}.actions{justify-content:stretch}.actions button{flex:1}.section{max-width:none;}}
+</style>
+</head>
+<body>
+<div class="container">
+    <header class="header">
+        <div>
+            <h1 class="title">Create announcement</h1>
+        </div>
+    </header>
+
+    <main id="announcementPage" hidden>
+        <div class="section">
+            <label for="announcementText">Announcement</label>
+            <textarea id="announcementText" maxlength="2000" placeholder="Write an important school announcement..."></textarea>
+            <div class="notice" id="formNotice" role="alert"></div>
+        </div>
+        <div class="section" style="margin-top:22px;">
+            <label>Select recipients</label>
+            <div class="filter-row">
+                <label><input type="radio" name="audience" value="learners" checked> Learners</label>
+                <label><input type="radio" name="audience" value="parents"> Parents</label>
+                <label><input type="radio" name="audience" value="both"> Learners and parents</label>
+                <div class="grade-filters" id="gradeFilter" aria-label="Filter by grade">
+                    <label><input type="checkbox" value="all" checked> All grades</label>
+                    <label><input type="checkbox" value="Grade 8"> Grade 8</label>
+                    <label><input type="checkbox" value="Grade 9"> Grade 9</label>
+                    <label><input type="checkbox" value="Grade 10"> Grade 10</label>
+                    <label><input type="checkbox" value="Grade 11"> Grade 11</label>
+                    <label><input type="checkbox" value="Grade 12"> Grade 12</label>
+                </div>
+            </div>
+            <div class="recipient-toolbar">
+                <input type="search" id="recipientSearch" placeholder="Search by name, email, or phone..." aria-label="Search recipients">
+                <button class="secondary" type="button" id="selectAllBtn">Select all</button>
+                <button class="secondary" type="button" id="clearAllBtn">Clear</button>
+            </div>
+            <div class="recipient-list" id="recipientList"></div>
+            <div class="subtitle" id="recipientSummary">0 recipients selected</div>
+        </div>
+        <div class="section" style="margin-top:22px;">
+            <label>Delivery method</label>
+            <div class="delivery-method" id="deliveryMethod" role="radiogroup" aria-label="Announcement delivery method">
+                <label><input type="radio" name="deliveryMethod" value="email"> Email</label>
+                <label><input type="radio" name="deliveryMethod" value="sms" disabled> SMS (provider required)</label>
+            </div>
+        </div>
+        <div class="actions" style="margin-top:22px;">
+            <a class="secondary saved-announcements-link" href="announcements.html">Saved announcements</a>
+            <button type="button" id="sendAnnouncementBtn">Send announcement</button>
+        </div>
+    </main>
+
+    <div class="access-denied" id="accessDenied">Only administrators can create announcements.</div>
+</div>
+<div class="bottom-tab-bar" id="bottomTabBar" aria-label="Primary navigation"></div>
+<script src="tab-bar.js"></script>
+<script>
+const profile = JSON.parse(localStorage.getItem('schoolProfileData') || '{}');
+const role = (profile.role || '').toString().trim().toLowerCase();
+const isAdmin = role === 'administrator' || role === 'admin';
+const school = (profile.schoolName || profile.schoolSearch || '').toString().trim().toLowerCase();
+const currentEmail = (profile.email || '').toString().trim().toLowerCase();
+const announcementPage = document.getElementById('announcementPage');
+const accessDenied = document.getElementById('accessDenied');
+const announcementText = document.getElementById('announcementText');
+const recipientSearch = document.getElementById('recipientSearch');
+const recipientList = document.getElementById('recipientList');
+const recipientSummary = document.getElementById('recipientSummary');
+const formNotice = document.getElementById('formNotice');
+const gradeFilter = document.getElementById('gradeFilter');
+const deliveryMethod = document.getElementById('deliveryMethod');
+const selectedRecipients = new Set();
+const announcementsKey = 'schoolAnnouncements';
+
+function applyTheme(){ document.body.classList.toggle('dark-mode', localStorage.getItem('schoolDarkMode') === 'true'); }
+function readRegistry(){
+    try { const data = JSON.parse(localStorage.getItem('schoolUsersRegistry') || '[]'); return Array.isArray(data) ? data : []; }
+    catch (error) { return []; }
+}
+function getRecipients(){
+    const registry = readRegistry();
+    const audience = document.querySelector('input[name="audience"]:checked')?.value || 'learners';
+    const selectedGrades = [...gradeFilter.querySelectorAll('input:not([value="all"]):checked')].map(input => input.value.toLowerCase());
+    const schoolMatches = user => {
+        const userEmail = (user.email || '').toString().trim().toLowerCase();
+        const userSchool = (user.schoolName || user.schoolSearch || '').toString().trim().toLowerCase();
+        return userEmail !== currentEmail && Boolean(school) && userSchool === school;
+    };
+    const learners = registry.filter(user => schoolMatches(user) && (user.role || '').toString().trim().toLowerCase() === 'student' && (!selectedGrades.length || selectedGrades.includes((user.grade || '').toString().trim().toLowerCase())));
+    const parents = registry.filter(user => schoolMatches(user) && (user.role || '').toString().trim().toLowerCase() === 'parent');
+    if (audience === 'learners') return learners;
+    if (audience === 'parents') return parents;
+    return [...learners, ...parents.filter(parent => !learners.some(learner => recipientId(learner, 0) === recipientId(parent, 0)))];
+}
+function recipientId(user, index){ return (user.email || user.phone || user.fullName || `recipient-${index}`).toString().trim().toLowerCase(); }
+function renderRecipients(){
+    const query = recipientSearch.value.trim().toLowerCase();
+    const recipients = getRecipients().filter(user => {
+        const text = `${user.fullName || ''} ${user.email || ''} ${user.phone || ''}`.toLowerCase();
+        return !query || text.includes(query);
+    });
+    if (!recipients.length) { recipientList.innerHTML = '<div class="empty">No matching users found.</div>'; updateSummary(); return; }
+    recipientList.innerHTML = recipients.map((user, index) => {
+        const id = recipientId(user, index);
+        const name = user.fullName || 'Unnamed user';
+        const email = user.email || 'No email';
+        const phone = user.phone || 'No phone';
+        return `<label class="recipient"><input type="checkbox" data-recipient-id="${id}" ${selectedRecipients.has(id) ? 'checked' : ''}><span class="recipient-copy"><span class="recipient-name">${name}</span><span class="recipient-meta">Email: ${email} · Phone: ${phone}</span></span></label>`;
+    }).join('');
+    recipientList.querySelectorAll('input[type="checkbox"]').forEach(input => input.addEventListener('change', () => { if (input.checked) selectedRecipients.add(input.dataset.recipientId); else selectedRecipients.delete(input.dataset.recipientId); updateSummary(); }));
+    updateSummary();
+}
+function updateSummary(){ recipientSummary.textContent = `${selectedRecipients.size} recipient${selectedRecipients.size === 1 ? '' : 's'} selected`; }
+function setNotice(message){ formNotice.textContent = message; formNotice.classList.toggle('visible', Boolean(message)); }
+function readAnnouncements(){ try { const data = JSON.parse(localStorage.getItem(announcementsKey) || '[]'); return Array.isArray(data) ? data : []; } catch (error) { return []; } }
+async function sendAnnouncement(){
+    const message = announcementText.value.trim();
+    if (!message) { setNotice('Write an announcement before sending.'); announcementText.focus(); return; }
+    if (!selectedRecipients.size) { setNotice('Select at least one recipient.'); return; }
+    const method = document.querySelector('input[name="deliveryMethod"]:checked')?.value;
+    if (!method) { setNotice('Choose Email before sending.'); deliveryMethod.querySelector('input').focus(); return; }
+    if (method !== 'email') { setNotice('SMS announcements require a separate SMS provider.'); return; }
+    const recipientEmails = getRecipients().filter((user, index) => selectedRecipients.has(recipientId(user, index))).map(user => (user.email || '').trim().toLowerCase());
+    if (recipientEmails.some(email => !email)) { setNotice('Every selected recipient needs a registered email address.'); return; }
+
+    const sendButton = document.getElementById('sendAnnouncementBtn');
+    sendButton.disabled = true;
+    try {
+        const result = await window.UrskoolApi.request('api/announcements.php?action=send', {
+            method: 'POST',
+            body: { message, deliveryMethod: method, recipientEmails }
+        });
+        setNotice(`Announcement emailed to ${result.sentCount} of ${result.recipientCount} selected recipient(s). ${result.failedCount} delivery failure(s).`);
+        announcementText.value = '';
+        selectedRecipients.clear();
+        renderRecipients();
+    } catch (error) {
+        setNotice(error.message || 'The announcement could not be sent.');
+    } finally {
+        sendButton.disabled = false;
+    }
+}
+async function init(){
+    applyTheme();
+    if (!isAdmin) { accessDenied.style.display = 'block'; return; }
+    try {
+        const result = await window.UrskoolApi.request('api/users.php');
+        window.UrskoolApi.cacheUsers(result.users || []);
+    } catch (error) {
+        accessDenied.textContent = error.message || 'Could not load school recipients.';
+        accessDenied.style.display = 'block';
+        return;
+    }
+    announcementPage.hidden = false;
+    renderRecipients();
+    recipientSearch.addEventListener('input', renderRecipients);
+    gradeFilter.addEventListener('change', (event) => {
+        const allGrades = gradeFilter.querySelector('input[value="all"]');
+        if (event.target.value === 'all' && event.target.checked) {
+            gradeFilter.querySelectorAll('input:not([value="all"])').forEach(input => { input.checked = false; });
+        } else if (event.target.value !== 'all' && event.target.checked) {
+            allGrades.checked = false;
+        }
+        if (!gradeFilter.querySelector('input:not([value="all"]):checked')) allGrades.checked = true;
+        selectedRecipients.clear();
+        renderRecipients();
+    });
+    document.querySelectorAll('input[name="audience"]').forEach(input => input.addEventListener('change', () => { selectedRecipients.clear(); renderRecipients(); }));
+    document.getElementById('selectAllBtn').addEventListener('click', () => { getRecipients().forEach((user,index) => selectedRecipients.add(recipientId(user,index))); renderRecipients(); });
+    document.getElementById('clearAllBtn').addEventListener('click', () => { selectedRecipients.clear(); renderRecipients(); });
+    document.getElementById('sendAnnouncementBtn').addEventListener('click', sendAnnouncement);
+}
+init();
+</script>
+</body>
+</html>

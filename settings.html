@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Settings</title>
+<script src="api-client.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
+body{
+    min-height:100vh;
+    background:linear-gradient(135deg,#f3f7ff 0%, #eef4fb 100%);
+    color:#173b5e;
+    padding:clamp(16px,4vw,32px) 0 112px;
+    text-align:left;
+}
+body.dark-mode{
+    background:linear-gradient(135deg,#0d1a2b 0%, #091420 100%);
+    color:#c8d8e8;
+}
+.container{width:100%;max-width:760px;margin:0;padding:0 clamp(12px,4vw,28px);display:grid;gap:clamp(14px,2.5vw,20px);justify-items:start;text-align:left;}
+.card{background:transparent;border:0;box-shadow:none;border-radius:0;padding:0;width:100%;}
+body.dark-mode .card{background:#132436;border-color:rgba(200,216,232,0.12);color:#c8d8e8;}
+body.dark-mode .header{background:transparent;border:0;box-shadow:none;border-radius:0;}
+.tail-spacer{height:96px;}
+.header{display:flex;align-items:center;gap:14px;background:transparent;border:0;box-shadow:none;padding:0;}
+.title{font-size:clamp(24px,4vw,30px);font-weight:700;}
+.profile-summary{display:flex;align-items:center;gap:clamp(12px,2.5vw,18px);}
+.avatar{width:clamp(60px,9vw,76px);height:clamp(60px,9vw,76px);flex:0 0 auto;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#173b5e,#3a79b8);color:#fff;font-size:clamp(24px,4vw,32px);font-weight:700;overflow:hidden;}
+.avatar.admin-avatar{cursor:pointer;transition:transform 0.2s ease,box-shadow 0.2s ease;}
+.avatar.admin-avatar:hover{transform:scale(1.04);box-shadow:0 0 0 4px rgba(58,121,184,0.18);}
+.avatar.admin-avatar:focus-visible{outline:3px solid #3a79b8;outline-offset:3px;}
+.avatar.has-image{background-position:center;background-size:cover;background-repeat:no-repeat;}
+.avatar-upload-input{display:none;}
+.avatar-menu{position:absolute;top:84px;left:0;z-index:5;display:none;min-width:170px;padding:6px;background:#fff;border:1px solid rgba(23,59,94,0.12);border-radius:12px;box-shadow:0 10px 24px rgba(13,41,68,0.16);}
+.avatar-menu.open{display:grid;gap:2px;}
+.avatar-menu button{border:0;border-radius:8px;padding:9px 10px;background:transparent;color:#173b5e;text-align:left;font-size:13px;font-weight:600;cursor:pointer;}
+.avatar-menu button:hover{background:#eef6ff;}
+.avatar-menu button.delete-avatar{color:#b42318;}
+.image-editor-overlay{position:fixed;inset:0;z-index:3000;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(7,18,32,0.58);}
+.image-editor-overlay.open{display:flex;}
+.image-editor{width:min(380px,100%);padding:20px;border-radius:18px;background:#fff;box-shadow:0 20px 50px rgba(7,18,32,0.3);}
+.image-editor h2{margin-bottom:14px;color:#173b5e;font-size:18px;}
+.crop-preview{width:min(300px,100%);aspect-ratio:1;margin:0 auto 16px;border-radius:50%;overflow:hidden;background:#eef4fb;}
+.crop-preview canvas{display:block;width:100%;height:100%;}
+.crop-control{display:grid;gap:7px;margin-bottom:14px;color:#5d6f80;font-size:13px;}
+.crop-control input{width:100%;accent-color:#173b5e;}
+.image-editor-actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;}
+.image-editor-actions button{border:0;border-radius:10px;padding:10px 13px;background:#173b5e;color:#fff;font-weight:600;cursor:pointer;}
+.image-editor-actions button.secondary{background:#f4f7fb;color:#173b5e;border:1px solid rgba(23,59,94,0.1);}
+.image-editor-actions button:hover{background:#0f2a45;}
+.image-editor-actions button.secondary:hover{background:#eaf2fa;}
+body.dark-mode .image-editor{background:#132436;}
+body.dark-mode .image-editor h2{color:#c8d8e8;}
+body.dark-mode .crop-preview{background:#1a2e44;}
+body.dark-mode .crop-control{color:#9bb3cc;}
+body.dark-mode .image-editor-actions button.secondary{background:#1a2e44;color:#c8d8e8;border-color:rgba(200,216,232,0.12);}
+body.dark-mode .image-editor-actions button.secondary:hover{background:#1e3a52;}
+body.dark-mode .avatar-menu{background:#132436;border-color:rgba(200,216,232,0.12);box-shadow:0 10px 24px rgba(0,0,0,0.3);}
+body.dark-mode .avatar-menu button{color:#c8d8e8;}
+body.dark-mode .avatar-menu button:hover{background:#1e3a52;}
+body.dark-mode .avatar-menu button.delete-avatar{color:#f08072;}
+.name{font-size:24px;font-weight:700;}
+.role{font-size:14px;color:#5d6f80;margin-top:4px;}
+body.dark-mode .role{color:#7a9dba;}
+.settings-list{display:grid;gap:clamp(8px,1.8vw,14px);width:100%;}
+.setting-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border:0;border-radius:0;background:transparent;text-decoration:none;color:inherit;cursor:pointer;width:100%;text-align:left;}
+body.dark-mode .setting-item{background:transparent;border-color:transparent;}
+#classFormatMain{background:transparent;border:0;box-shadow:none;border-radius:0;padding:14px 0;transition:none;}
+body.dark-mode #classFormatMain{background:transparent;border-color:transparent;}
+#classFormatSummary:hover #classFormatMain{background:transparent;}
+body.dark-mode #classFormatSummary:hover #classFormatMain{background:transparent;}
+.setting-main{display:flex;align-items:center;gap:12px;flex:1;min-width:0;justify-content:flex-start;text-align:left;}
+.setting-icon{width:42px;height:42px;border-radius:0;display:grid;place-items:center;background:transparent;font-size:20px;border:0;box-shadow:none;}
+body.dark-mode .setting-icon{background:transparent;}
+.setting-label{font-size:16px;font-weight:600;}
+.setting-value{font-size:13px;color:#5d6f80;display:flex;align-items:center;gap:8px;}
+body.dark-mode .setting-value{color:#7a9dba;}
+.toggle{position:relative;width:52px;height:28px;border-radius:999px;background:#d3dbe6;transition:0.2s ease;}
+.toggle::after{content:'';position:absolute;top:4px;left:4px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,0.2);transition:0.2s ease;}
+.toggle.active{background:#173b5e;}
+body.dark-mode .toggle.active{background:#2a6fa8;}
+.toggle.active::after{left:28px;}
+.danger .setting-label{color:#b42318;}
+.danger .setting-icon{background:transparent;color:#b42318;}
+.teacher-classes-details{display:grid;gap:14px;}
+.teacher-class-entry{display:flex;gap:8px;}
+.teacher-class-entry input{min-width:0;flex:1;padding:10px 12px;border:1px solid rgba(23,59,94,.16);border-radius:8px;color:#173b5e;font-size:15px;}
+.teacher-class-format-hint{font-size:12px;line-height:1.5;color:#5d6f80;}
+.teacher-class-message{min-height:16px;color:#b42318;font-size:13px;line-height:1.4;}
+.teacher-class-message:empty{display:none;}
+.teacher-class-add{display:grid;place-items:center;flex:0 0 44px;width:44px;height:44px;padding:0;border:0;background:transparent;color:#173b5e;cursor:pointer;transition:color .15s ease,transform .15s ease;}
+.teacher-class-add svg{display:block;width:28px;height:28px;}
+.teacher-class-add:hover{color:#2a7890;transform:scale(1.06);}
+.teacher-class-add:focus-visible{outline:2px solid #3a79b8;outline-offset:2px;}
+.teacher-class-list{display:grid;gap:7px;}
+.teacher-class-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid rgba(23,59,94,.1);}
+.teacher-class-row button{border:0;background:transparent;color:#b42318;font-weight:700;cursor:pointer;}
+body.dark-mode .teacher-class-entry input{background:#1a2e44;color:#c8d8e8;border-color:rgba(200,216,232,.2);}
+body.dark-mode .teacher-class-format-hint{color:#9bb3cc;}
+body.dark-mode .teacher-class-add{color:#c8d8e8;}
+body.dark-mode .teacher-class-add:hover{color:#7db8e8;}
+body.dark-mode .teacher-class-row{border-color:rgba(200,216,232,.12);}
+body.dark-mode .teacher-class-row button{color:#f08072;}
+.bottom-tab-bar{
+    position:fixed;left:50%;bottom:max(14px,2.5vh);transform:translateX(-50%);width:min(520px, calc(100% - 24px));display:flex;align-items:center;justify-content:space-between;gap:clamp(6px,2vw,12px);padding:clamp(8px,2vw,14px) clamp(10px,2.5vw,16px);border-radius:999px;background:rgba(255,255,255,0.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(23,59,94,0.12);box-shadow:0 18px 35px rgba(13,41,68,0.14);z-index:1000;
+}
+body.dark-mode .bottom-tab-bar{background:rgba(19,36,54,0.92);border-color:rgba(200,216,232,0.12);}
+.tab-btn{
+    flex:1;display:grid;place-items:center;width:clamp(48px,7vw,60px);height:clamp(48px,7vw,60px);border:none;background:transparent;color:#173b5e;border-radius:50%;text-decoration:none;font-size:clamp(23px,3.5vw,30px);cursor:pointer;transition:all 0.2s ease;
+}
+.tab-btn:hover{background:rgba(23,59,94,0.07);transform:translateY(-1px);}
+.tab-btn.active{background:linear-gradient(135deg,#173b5e,#3a79b8);color:#fff;box-shadow:0 10px 22px rgba(23,59,94,0.20);}
+body.dark-mode .tab-btn{color:#c8d8e8;}
+body.dark-mode .tab-btn.active{background:linear-gradient(135deg,#1e4a76,#2a6fa8);}
+@media (max-width: 540px){
+    body{padding-bottom:104px;}
+    .card{padding:0;}
+    .name{font-size:20px;}
+    .settings-list{padding-left:0;padding-right:0;}
+    .setting-item{width:100%;min-height:64px;padding:18px 0;border:0;border-radius:0;background:transparent;text-align:left;}
+    .setting-item:hover{background:transparent;}
+    body.dark-mode .setting-item{background:transparent;border-color:transparent;}
+    .setting-main{justify-content:flex-start;}
+    #classFormatSummary{border-radius:0!important;}
+    #classFormatMain{padding:18px 0!important;border:0!important;border-radius:0!important;background:transparent!important;}
+    body.dark-mode #classFormatMain{background:transparent!important;border-color:transparent!important;}
+    .setting-label{font-size:16px;}
+}
+.legal-block{display:grid;gap:10px;padding-top:4px;}
+.legal-title{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#5d6f80;}
+body.dark-mode .legal-title{color:#7a9dba;}
+/* ===== Modern rounded container (single soft panel that groups the settings items) ===== */
+.soft-panel{
+    width:100%;
+    background:rgba(255,255,255,0.72);
+    backdrop-filter:blur(18px) saturate(150%);
+    -webkit-backdrop-filter:blur(18px) saturate(150%);
+    border:1px solid rgba(255,255,255,0.70);
+    border-radius:28px;
+    box-shadow:0 22px 48px rgba(13,41,68,0.10), 0 2px 6px rgba(13,41,68,0.05);
+    padding:clamp(12px,2.4vw,18px) clamp(14px,2.8vw,22px);
+}
+body.dark-mode .soft-panel{
+    background:rgba(19,36,54,0.68);
+    border-color:rgba(200,216,232,0.10);
+    box-shadow:0 22px 48px rgba(0,0,0,0.38);
+}
+@media (max-width:540px){
+    .soft-panel{border-radius:22px;padding:8px 14px;}
+}
+.setting-icon svg{display:block;width:20px;height:20px;}
+/* Flat sections below Log out - no cards, no rounded rectangles */
+.plain-section{padding:6px 0 2px;display:grid;gap:12px;border-top:1px solid rgba(23,59,94,.10);}
+body.dark-mode .plain-section{border-top-color:rgba(200,216,232,.12);}
+.plain-center{text-align:center;font-size:12px;color:#5d6f80;display:grid;gap:4px;}
+.plain-center a{color:#3a79b8;font-weight:600;text-decoration:none;}
+body.dark-mode .plain-center{color:#7a9dba;}
+body.dark-mode .plain-center a{color:#7db8e8;}
+.plain-center strong{color:#173b5e;}
+body.dark-mode .plain-center strong{color:#c8d8e8;}
+.biz-row{display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.6;}
+.biz-row .setting-icon{width:36px;height:36px;font-size:17px;flex:0 0 auto;background:transparent;border:0;box-shadow:none;border-radius:0;}
+.biz-row a{color:#3a79b8;font-weight:600;text-decoration:none;}
+.biz-row a:hover{text-decoration:underline;}
+body.dark-mode .biz-row a{color:#7db8e8;}
+.social-row{display:flex;flex-wrap:wrap;gap:14px;align-items:center;}
+.social-icon{display:inline-grid;place-items:center;width:40px;height:40px;background:transparent;border:0;border-radius:0;text-decoration:none;transition:transform .15s ease;}
+.social-icon:hover{transform:translateY(-2px) scale(1.06);}
+.social-icon svg{width:26px;height:26px;display:block;}
+body.dark-mode .social-icon svg[fill="#111"]{fill:#e8eef5;}
+/* Cookie banner */
+.cookie-banner{position:fixed;left:50%;transform:translateX(-50%) translateY(20px);bottom:86px;width:min(560px,calc(100% - 24px));background:#fff;border:1px solid rgba(23,59,94,.14);border-radius:18px;box-shadow:0 18px 40px rgba(13,41,68,.22);padding:16px 18px;display:none;gap:12px;z-index:2000;}
+.cookie-banner.show{display:grid;}
+.cookie-banner p{font-size:13px;line-height:1.6;color:#314a62;}
+.cookie-actions{display:flex;flex-wrap:wrap;gap:8px;}
+.cookie-actions button{border:0;border-radius:10px;padding:10px 16px;font-weight:700;font-size:13px;cursor:pointer;}
+.cookie-accept{background:linear-gradient(135deg,#173b5e,#3a79b8);color:#fff;}
+.cookie-decline{background:#eef4fb;color:#173b5e;border:1px solid rgba(23,59,94,.15);}
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="card header">
+        <div class="title">Settings</div>
+    </div>
+
+    <div class="card profile-summary">
+        <div style="position:relative;">
+            <div class="avatar" id="userAvatar">U</div>
+            <div class="avatar-menu" id="avatarMenu" role="menu">
+                <button type="button" id="changeAvatarBtn" role="menuitem">Change picture</button>
+                <button type="button" id="deleteAvatarBtn" class="delete-avatar" role="menuitem">Delete picture</button>
+            </div>
+        </div>
+        <input class="avatar-upload-input" id="avatarUploadInput" type="file" accept="image/*">
+        <div>
+            <div class="name" id="userName">User</div>
+            <div class="role" id="userRole">Role</div>
+        </div>
+    </div>
+
+    <div class="card settings-list soft-panel">
+        <div class="setting-item" id="accountSummary" style="cursor:pointer;">
+            <div class="setting-main">
+                <div class="setting-icon"><svg class="account-icon" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="50" cy="50" r="40"/><circle cx="50" cy="40" r="10.5"/><path d="M 30 70 A 34 34 0 0 1 70 70"/></svg></div>
+                <div>
+                    <div class="setting-label">Account</div>
+                    <div class="setting-value" id="accountSummaryText">View full details</div>
+                </div>
+            </div>
+            <div class="setting-value">▾</div>
+        </div>
+
+        <div id="accountDetails" style="display:none; padding:8px 0;">
+            <div style="display:grid; gap:12px;">
+                <div><strong>Full name:</strong> <span id="detailFullName">—</span></div>
+                <div><strong>Email:</strong> <span id="detailEmail">—</span></div>
+                <div><strong>Role:</strong> <span id="detailRole">—</span></div>
+                <div><strong>School:</strong> <span id="detailSchool">—</span></div>
+                <div id="detailGradeRow"><strong>Grade:</strong> <span id="detailGrade">—</span></div>
+                <div><strong>Province:</strong> <span id="detailProvince">—</span></div>
+            </div>
+        </div>
+
+        <a class="setting-item" href="saved.html" id="savedPostsLink">
+            <div class="setting-main">
+                <div class="setting-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4.5A1.5 1.5 0 0 1 7.5 3h9A1.5 1.5 0 0 1 18 4.5V21l-6-4-6 4z"/></svg></div>
+                <div>
+                    <div class="setting-label">Saved</div>
+                    <div class="setting-value" id="savedSummaryText">Posts you bookmarked</div>
+                </div>
+            </div>
+        </a>
+
+        <a class="setting-item" href="edit-profile.html">
+            <div class="setting-main">
+                <div class="setting-icon"><svg class="edit-profile-icon" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="50" cy="28" r="14"/><path d="M 14 84 A 41.54 41.54 0 0 1 66 58"/><g transform="translate(80.27, 65.72) rotate(45)" stroke-width="6"><rect x="0" y="0" width="12" height="22" rx="6"/><line x1="0" y1="6.5" x2="12" y2="6.5" stroke-width="4"/></g></svg></div>
+                <div class="setting-label">Edit profile</div>
+            </div>
+        </a>
+
+        <button class="setting-item" type="button" id="aboutButton">
+            <div class="setting-main">
+                <div class="setting-icon">ℹ</div>
+                <div class="setting-label">About</div>
+            </div>
+        </button>
+
+        <button class="setting-item" type="button" id="darkModeButton">
+            <div class="setting-main">
+                <div class="setting-icon">☾</div>
+                <div class="setting-label">Dark mode</div>
+            </div>
+            <div class="toggle" id="darkModeToggle"></div>
+        </button>
+
+        <div id="adminClassContainer" style="display:none;">
+            <button class="setting-item" type="button" id="classFormatSummary" style="width:100%; border:none; background:transparent; padding:14px 0; border-radius:0; cursor:pointer; text-align:left;">
+                <div class="setting-main" id="classFormatMain" style="padding:0;">
+                    <div class="setting-icon">⌗</div>
+                    <div>
+                        <div class="setting-label">Class format</div>
+                        <div class="setting-value" id="classFormatValue">Number format (e.g. 8.1)</div>
+                    </div>
+                </div>
+                <div class="setting-value">▾</div>
+            </button>
+            <div id="classFormatDetails" style="display:none; padding:8px 0;">
+                <div style="display:grid; gap:12px;">
+                    <div style="font-size:13px; color:#5d6f80;">Choose how class names are shown at your school.</div>
+                    <label style="display:flex; align-items:center; gap:10px; font-weight:600; cursor:pointer;">
+                        <input type="radio" name="classFormat" id="classFormatNumber" value="number" />
+                        Number format (e.g. 8.1)
+                    </label>
+                    <label style="display:flex; align-items:center; gap:10px; font-weight:600; cursor:pointer;">
+                        <input type="radio" name="classFormat" id="classFormatLetter" value="letter" />
+                        Letter format (e.g. 8A)
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div id="teacherClassContainer" style="display:none;">
+            <button class="setting-item" type="button" id="teacherClassSummary" style="width:100%; border:0; background:transparent; padding:14px 0; cursor:pointer; text-align:left; border-radius:0;">
+                <div class="setting-main" style="padding:0;">
+                    <div class="setting-icon">⌗</div>
+                    <div>
+                        <div class="setting-label">Add your class</div>
+                        <div class="setting-value" id="teacherClassValue">Manage attendance classes</div>
+                    </div>
+                </div>
+                <div class="setting-value">▾</div>
+            </button>
+            <div id="teacherClassDetails" style="display:none; padding:8px 0;">
+                <div class="teacher-classes-details">
+                    <label for="teacherClassInput">Class name</label>
+                    <p class="teacher-class-format-hint" id="teacherClassFormatHint"></p>
+                    <div class="teacher-class-entry">
+                        <input type="text" id="teacherClassInput" placeholder="e.g. 8.1">
+                        <button class="teacher-class-add" type="button" id="addTeacherClassBtn" aria-label="Add class" title="Add class">
+                            <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="50" cy="53" r="38" stroke="currentColor" stroke-width="8"/><line x1="30" y1="53" x2="70" y2="53" stroke="currentColor" stroke-width="10" stroke-linecap="square"/><line x1="50" y1="33" x2="50" y2="73" stroke="currentColor" stroke-width="10" stroke-linecap="square"/></svg>
+                        </button>
+                    </div>
+                    <p class="teacher-class-message" id="teacherClassMessage" role="status" aria-live="polite"></p>
+                    <div class="teacher-class-list" id="teacherClassList"></div>
+                </div>
+            </div>
+        </div>
+
+        <button class="setting-item danger" type="button" id="logoutButton">
+            <div class="setting-main">
+                <div class="setting-icon"><svg class="logout-icon" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M 50 15 L 22 15 A 9.8 9.8 0 0 0 12.2 24.8 L 12.2 75.2 A 9.8 9.8 0 0 0 22 85 L 50 85"/><line x1="38.8" y1="50" x2="86.4" y2="50"/><path d="M 65.4 29 L 87.8 50 L 65.4 71"/></svg></div>
+                <div class="setting-label">Log out</div>
+            </div>
+        </button>
+
+        <div class="legal-block">
+            <div class="legal-title">Legal</div>
+            <a class="setting-item" href="privacy-policy.html">
+                <div class="setting-main"><div class="setting-icon"><svg class="privacy-icon" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><defs><mask id="urskool-privacy-shield-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100"><rect x="0" y="0" width="100" height="100" fill="#fff" stroke="none"/><path d="M 52.6 46.3 C 52.6 46.3 70.5 41.1 84.1 46.3 C 84.1 65.2 78.9 81 68.4 90.4 C 57.9 81 52.6 65.2 52.6 46.3 Z" fill="#000" stroke="#000" stroke-width="12"/></mask></defs><path d="M 15.9 9.6 L 54.7 9.6 A 8.4 8.4 0 0 1 63.1 18 L 63.1 32.7"/><path d="M 44.2 74.7 L 24.3 74.7 A 8.4 8.4 0 0 1 15.9 66.3 L 15.9 18"/><g mask="url(#urskool-privacy-shield-mask)"><line x1="28.5" y1="26.4" x2="44.2" y2="26.4"/><line x1="28.5" y1="43.2" x2="54.7" y2="43.2"/><line x1="28.5" y1="60" x2="40" y2="60"/></g><path d="M 52.6 46.3 C 52.6 46.3 70.5 41.1 84.1 46.3 C 84.1 65.2 78.9 81 68.4 90.4 C 57.9 81 52.6 65.2 52.6 46.3 Z"/><path d="M 62 68.2 L 66.6 72.8 L 75.9 60.8"/></svg></div><div class="setting-label">Privacy Policy</div></div>
+            </a>
+            <a class="setting-item" href="terms.html">
+                <div class="setting-main"><div class="setting-icon"><svg class="terms-icon" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M 69.8 26 L 78.2 26 A 3.6 3.6 0 0 1 81.8 29.6 L 81.8 81.2 A 8.4 8.4 0 0 1 69.8 89.6 L 69.8 26 Z"/><path d="M 18.2 11.6 L 69.8 11.6 L 69.8 80 A 8.4 8.4 0 0 1 61.4 88.4 L 26.6 88.4 A 8.4 8.4 0 0 1 18.2 80 Z"/><line x1="29" y1="30" x2="59" y2="30" stroke-width="8"/><rect x="28" y="41" width="12" height="12" rx="2" stroke-width="5"/><line x1="46" y1="45" x2="60" y2="45" stroke-width="5"/><line x1="46" y1="51" x2="57" y2="51" stroke-width="5"/><rect x="28" y="65" width="12" height="12" rx="2" stroke-width="5"/><line x1="46" y1="71" x2="60" y2="71" stroke-width="5"/></svg></div><div class="setting-label">Terms of Service</div></div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="plain-section">
+        <div class="legal-title">Business details</div>
+        <div class="biz-row"><div class="setting-icon">◉</div><div><strong>UrSKOOL</strong><br>Website: <a href="https://urskool.co.za">UrSkool.co.za</a></div></div>
+        <div class="biz-row"><div class="setting-icon">✉</div><div>Email us: <a href="mailto:hello@urskool.co.za">hello@urskool.co.za</a></div></div>
+        <div class="biz-row"><div class="setting-icon">◷</div><div>Support hours: Mon–Fri, 08:00–17:00 SAST</div></div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="plain-section">
+        <div class="legal-title">Connect with us</div>
+        <div class="social-row">
+            <a class="social-icon" href="https://wa.me/27000000000" target="_blank" rel="noopener" aria-label="WhatsApp"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#25D366" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg></a>
+            <a class="social-icon" href="https://facebook.com/urskool" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="#1877F2" aria-hidden="true"><path d="M13.5 22v-8h2.7l.4-3.2h-3.1V8.7c0-.9.3-1.6 1.6-1.6h1.7V4.2c-.3 0-1.3-.1-2.4-.1-2.4 0-4 1.4-4 4.1v2.6H7.7V14h2.7v8h3.1z"/></svg></a>
+            <a class="social-icon" href="https://instagram.com/urskool" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="#E1306C" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1.3" fill="#E1306C" stroke="none"/></svg></a>
+            <a class="social-icon" href="https://tiktok.com/@urskool" target="_blank" rel="noopener" aria-label="TikTok"><svg viewBox="0 0 24 24" fill="#111" aria-hidden="true"><path d="M16.5 3c.4 2 1.8 3.6 3.9 3.9v3c-1.5 0-2.9-.5-3.9-1.3v6.1a5.9 5.9 0 1 1-5.9-5.9c.3 0 .7 0 1 .1v3.1a2.8 2.8 0 1 0 1.9 2.7V3h3z"/></svg></a>
+            <a class="social-icon" href="https://x.com/urskool" target="_blank" rel="noopener" aria-label="X"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.8 3h3l-6.6 7.6L22 21h-6.1l-4.8-6.3L5.6 21h-3l7.1-8.1L2 3h6.3l4.3 5.7L17.8 3zm-1.1 16.1h1.7L7.4 4.7H5.6l11.1 14.4z"/></svg></a>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="plain-section plain-center">
+        <div><strong>&copy; 2026 UrSKOOL. All rights reserved.</strong></div>
+        <div><a href="privacy-policy.html">Privacy</a> · <a href="terms.html">Terms</a></div>
+    </div>
+</div>
+
+<div class="tail-spacer" aria-hidden="true"></div>
+
+<div class="bottom-tab-bar" id="bottomTabBar" aria-label="Primary navigation"></div>
+
+<div class="image-editor-overlay" id="imageEditorOverlay" role="dialog" aria-modal="true" aria-labelledby="imageEditorTitle">
+    <div class="image-editor">
+        <h2 id="imageEditorTitle">Adjust profile picture</h2>
+        <div class="crop-preview"><canvas id="cropCanvas" width="600" height="600"></canvas></div>
+        <label class="crop-control" for="cropZoom">Crop zoom
+            <input id="cropZoom" type="range" min="1" max="3" step="0.01" value="1">
+        </label>
+        <div class="image-editor-actions">
+            <button type="button" class="secondary" id="rotateBtn" aria-label="Rotate picture">↻ Rotate</button>
+            <button type="button" class="secondary" id="cancelImageEditBtn">Cancel</button>
+            <button type="button" id="saveImageEditBtn">Save picture</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const profileStorageKey = 'schoolProfileData';
+const savedProfile = JSON.parse(localStorage.getItem(profileStorageKey) || '{}');
+const currentRole = (savedProfile.role || '').toString().trim().toLowerCase();
+
+const userAvatar = document.getElementById('userAvatar');
+const avatarUploadInput = document.getElementById('avatarUploadInput');
+const avatarMenu = document.getElementById('avatarMenu');
+const changeAvatarBtn = document.getElementById('changeAvatarBtn');
+const deleteAvatarBtn = document.getElementById('deleteAvatarBtn');
+const imageEditorOverlay = document.getElementById('imageEditorOverlay');
+const cropCanvas = document.getElementById('cropCanvas');
+const cropZoom = document.getElementById('cropZoom');
+const rotateBtn = document.getElementById('rotateBtn');
+const cancelImageEditBtn = document.getElementById('cancelImageEditBtn');
+const saveImageEditBtn = document.getElementById('saveImageEditBtn');
+const userName = document.getElementById('userName');
+const userRole = document.getElementById('userRole');
+const darkModeToggle = document.getElementById('darkModeToggle');
+const darkModeButton = document.getElementById('darkModeButton');
+const aboutButton = document.getElementById('aboutButton');
+const logoutButton = document.getElementById('logoutButton');
+const adminClassContainer = document.getElementById('adminClassContainer');
+const teacherClassContainer = document.getElementById('teacherClassContainer');
+const teacherClassSummary = document.getElementById('teacherClassSummary');
+const teacherClassDetails = document.getElementById('teacherClassDetails');
+const teacherClassValue = document.getElementById('teacherClassValue');
+const teacherClassInput = document.getElementById('teacherClassInput');
+const teacherClassFormatHint = document.getElementById('teacherClassFormatHint');
+const teacherClassMessage = document.getElementById('teacherClassMessage');
+const teacherClassList = document.getElementById('teacherClassList');
+const classFormatSummary = document.getElementById('classFormatSummary');
+const classFormatDetails = document.getElementById('classFormatDetails');
+const classFormatValue = document.getElementById('classFormatValue');
+const classFormatNumber = document.getElementById('classFormatNumber');
+const classFormatLetter = document.getElementById('classFormatLetter');
+const classFormatStorageKey = 'schoolClassFormat';
+const teacherClassStorageKey = 'schoolTeacherClasses';
+const teacherId = (savedProfile.email || savedProfile.fullName || 'teacher').toString().trim().toLowerCase();
+const accountSummary = document.getElementById('accountSummary');
+const accountDetails = document.getElementById('accountDetails');
+const detailFullName = document.getElementById('detailFullName');
+const detailEmail = document.getElementById('detailEmail');
+const detailRole = document.getElementById('detailRole');
+const detailSchool = document.getElementById('detailSchool');
+const detailGrade = document.getElementById('detailGrade');
+const detailGradeRow = document.getElementById('detailGradeRow');
+const detailProvince = document.getElementById('detailProvince');
+
+const fullName = savedProfile.fullName || `${(savedProfile.firstName || '').trim()} ${(savedProfile.lastName || '').trim()}`.trim() || 'User';
+const role = (savedProfile.role || 'User').replace(/\b\w/g, ch => ch.toUpperCase());
+let imageEditorSource = null;
+let imageEditorRotation = 0;
+
+const avatarInitial = (fullName.charAt(0) || 'U').toUpperCase();
+userAvatar.textContent = avatarInitial;
+userName.textContent = fullName;
+userRole.textContent = role;
+
+function applyProfileImage(profileImage) {
+    if (profileImage) {
+        userAvatar.textContent = '';
+        userAvatar.classList.add('has-image');
+        userAvatar.style.backgroundImage = `url("${profileImage}")`;
+        return;
+    }
+
+    userAvatar.textContent = avatarInitial;
+    userAvatar.classList.remove('has-image');
+    userAvatar.style.backgroundImage = '';
+}
+
+function syncProfileImageToRegistry(profileImage) {
+    try {
+        const registry = JSON.parse(localStorage.getItem('schoolUsersRegistry') || '[]');
+        if (!Array.isArray(registry)) return;
+        const school = (savedProfile.schoolName || savedProfile.schoolSearch || '').trim().toLowerCase();
+        const email = (savedProfile.email || '').trim().toLowerCase();
+        registry.forEach((user) => {
+            const userEmail = (user.email || '').trim().toLowerCase();
+            const userSchool = (user.schoolName || user.schoolSearch || '').trim().toLowerCase();
+            if ((email && userEmail === email) || (!email && userSchool === school && user.fullName === fullName)) {
+                if (profileImage) user.profileImage = profileImage;
+                else delete user.profileImage;
+            }
+        });
+        localStorage.setItem('schoolUsersRegistry', JSON.stringify(registry));
+    } catch (error) {
+        console.log('Unable to sync profile picture', error);
+    }
+}
+
+function renderImageEditor() {
+    if (!imageEditorSource) return;
+    const context = cropCanvas.getContext('2d');
+    const size = cropCanvas.width;
+    const radians = imageEditorRotation * Math.PI / 180;
+    const sourceWidth = imageEditorSource.width;
+    const sourceHeight = imageEditorSource.height;
+    const scale = Math.max(size / sourceWidth, size / sourceHeight) * Number(cropZoom.value);
+    const drawWidth = sourceWidth * scale;
+    const drawHeight = sourceHeight * scale;
+
+    context.clearRect(0, 0, size, size);
+    context.save();
+    context.translate(size / 2, size / 2);
+    context.rotate(radians);
+    context.drawImage(imageEditorSource, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
+    context.restore();
+}
+
+function openImageEditor(dataUrl) {
+    const image = new Image();
+    image.onload = function() {
+        imageEditorSource = image;
+        imageEditorRotation = 0;
+        cropZoom.value = '1';
+        renderImageEditor();
+        imageEditorOverlay.classList.add('open');
+    };
+    image.src = dataUrl;
+}
+
+function closeImageEditor() {
+    imageEditorOverlay.classList.remove('open');
+    imageEditorSource = null;
+}
+
+function saveEditedImage() {
+    if (!imageEditorSource) return;
+    const editedImage = cropCanvas.toDataURL('image/jpeg', 0.9);
+    savedProfile.profileImage = editedImage;
+    localStorage.setItem(profileStorageKey, JSON.stringify(savedProfile));
+    syncProfileImageToRegistry(editedImage);
+    applyProfileImage(editedImage);
+    closeImageEditor();
+}
+
+cropZoom.addEventListener('input', renderImageEditor);
+rotateBtn.addEventListener('click', function() {
+    imageEditorRotation = (imageEditorRotation + 90) % 360;
+    renderImageEditor();
+});
+cancelImageEditBtn.addEventListener('click', closeImageEditor);
+saveImageEditBtn.addEventListener('click', saveEditedImage);
+imageEditorOverlay.addEventListener('click', function(event) {
+    if (event.target === imageEditorOverlay) closeImageEditor();
+});
+
+if (isAdminRole()) {
+    userAvatar.classList.add('admin-avatar');
+    userAvatar.setAttribute('role', 'button');
+    userAvatar.setAttribute('tabindex', '0');
+    userAvatar.setAttribute('aria-label', 'Change profile picture');
+    userAvatar.title = 'Change profile picture';
+    userAvatar.addEventListener('click', function() {
+        avatarMenu.classList.toggle('open');
+    });
+    userAvatar.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            avatarMenu.classList.toggle('open');
+        }
+    });
+    changeAvatarBtn.addEventListener('click', function() {
+        avatarMenu.classList.remove('open');
+        avatarUploadInput.click();
+    });
+    deleteAvatarBtn.addEventListener('click', function() {
+        avatarMenu.classList.remove('open');
+        if (!savedProfile.profileImage || !confirm('Delete your profile picture?')) return;
+        delete savedProfile.profileImage;
+        localStorage.setItem(profileStorageKey, JSON.stringify(savedProfile));
+        syncProfileImageToRegistry('');
+        applyProfileImage('');
+    });
+    document.addEventListener('click', function(event) {
+        if (!userAvatar.contains(event.target) && !avatarMenu.contains(event.target)) {
+            avatarMenu.classList.remove('open');
+        }
+    });
+    avatarUploadInput.addEventListener('change', function() {
+        const file = avatarUploadInput.files && avatarUploadInput.files[0];
+        if (!file) return;
+        if (!file.type.startsWith('image/')) {
+            alert('Please choose an image file.');
+            avatarUploadInput.value = '';
+            return;
+        }
+        if (file.size > 2 * 1024 * 1024) {
+            alert('Please choose an image smaller than 2 MB.');
+            avatarUploadInput.value = '';
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function() {
+            openImageEditor(reader.result);
+        };
+        reader.readAsDataURL(file);
+    });
+    applyProfileImage(savedProfile.profileImage);
+}
+
+detailFullName.textContent = fullName || '—';
+detailEmail.textContent = savedProfile.email || '—';
+detailRole.textContent = role || '—';
+detailSchool.textContent = savedProfile.schoolName || savedProfile.schoolSearch || '—';
+detailGrade.textContent = savedProfile.grade || '—';
+detailProvince.textContent = savedProfile.province || '—';
+
+// Only show Grade for students
+if (currentRole !== 'student') {
+    detailGradeRow.style.display = 'none';
+}
+
+function loadDarkMode() {
+    const isDark = localStorage.getItem('schoolDarkMode') === 'true';
+    document.body.classList.toggle('dark-mode', isDark);
+    darkModeToggle.classList.toggle('active', isDark);
+}
+
+function toggleDarkMode() {
+    const isDark = !document.body.classList.contains('dark-mode');
+    document.body.classList.toggle('dark-mode', isDark);
+    darkModeToggle.classList.toggle('active', isDark);
+    localStorage.setItem('schoolDarkMode', isDark);
+}
+
+function isAdminRole() {
+    return currentRole === 'administrator' || currentRole === 'admin';
+}
+
+function getClassFormat() {
+    return localStorage.getItem(classFormatStorageKey) === 'letter' ? 'letter' : 'number';
+}
+
+function updateTeacherClassFormatHint() {
+    if (!teacherClassFormatHint || !teacherClassInput) return;
+    const isLetterFormat = getClassFormat() === 'letter';
+    teacherClassInput.placeholder = isLetterFormat ? 'e.g. 8A' : 'e.g. 8.1';
+    teacherClassFormatHint.textContent = `Grades 8-12 only. Class format set by the school admin: ${isLetterFormat ? 'letter (e.g. 8A)' : 'number (e.g. 8.1)'}.`;
+}
+
+function updateClassFormatUI() {
+    const format = getClassFormat();
+    if (classFormatNumber) classFormatNumber.checked = format === 'number';
+    if (classFormatLetter) classFormatLetter.checked = format === 'letter';
+    if (classFormatValue) {
+        classFormatValue.textContent = format === 'letter' ? 'Letter format (e.g. 8A)' : 'Number format (e.g. 8.1)';
+    }
+    updateTeacherClassFormatHint();
+}
+
+// Show the class format setting only for administrators
+if (isAdminRole()) {
+    adminClassContainer.style.display = 'block';
+    updateClassFormatUI();
+}
+
+function readTeacherClasses() {
+    try {
+        const allClasses = JSON.parse(localStorage.getItem(teacherClassStorageKey) || '{}');
+        return Array.isArray(allClasses[teacherId]) ? allClasses[teacherId] : [];
+    } catch (error) {
+        return [];
+    }
+}
+
+function writeTeacherClasses(classes) {
+    let allClasses = {};
+    try {
+        allClasses = JSON.parse(localStorage.getItem(teacherClassStorageKey) || '{}');
+        if (!allClasses || typeof allClasses !== 'object' || Array.isArray(allClasses)) allClasses = {};
+    } catch (error) {
+        allClasses = {};
+    }
+    allClasses[teacherId] = classes;
+    localStorage.setItem(teacherClassStorageKey, JSON.stringify(allClasses));
+}
+
+function renderTeacherClasses() {
+    const classes = readTeacherClasses();
+    teacherClassValue.textContent = classes.length ? `${classes.length} class${classes.length === 1 ? '' : 'es'}` : 'Manage attendance classes';
+    teacherClassList.replaceChildren();
+    if (!classes.length) {
+        const empty = document.createElement('p');
+        empty.className = 'setting-value';
+        empty.textContent = 'No classes added yet.';
+        teacherClassList.append(empty);
+        return;
+    }
+    classes.forEach((className) => {
+        const row = document.createElement('div');
+        row.className = 'teacher-class-row';
+        const name = document.createElement('span');
+        name.textContent = className;
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.textContent = 'Remove';
+        remove.setAttribute('aria-label', `Remove ${className}`);
+        remove.addEventListener('click', () => {
+            writeTeacherClasses(readTeacherClasses().filter((item) => item !== className));
+            renderTeacherClasses();
+        });
+        row.append(name, remove);
+        teacherClassList.append(row);
+    });
+}
+
+function addTeacherClass() {
+    const enteredClassName = teacherClassInput.value.trim();
+    const format = getClassFormat();
+    const className = format === 'letter' ? enteredClassName.toUpperCase() : enteredClassName;
+    const validClass = format === 'letter'
+        ? /^(8|9|10|11|12)[A-Z]+$/.test(className)
+        : /^(8|9|10|11|12)\.\d+$/.test(className);
+
+    if (!validClass) {
+        teacherClassMessage.textContent = format === 'letter'
+            ? 'Enter a class from Grade 8-12 in the school letter format (e.g. 8A).'
+            : 'Enter a class from Grade 8-12 in the school number format (e.g. 8.1).';
+        teacherClassInput.focus();
+        return;
+    }
+
+    const classes = readTeacherClasses();
+    if (classes.some((item) => item.toLowerCase() === className.toLowerCase())) {
+        teacherClassMessage.textContent = `${className} has already been added.`;
+        teacherClassInput.focus();
+        return;
+    }
+
+    classes.push(className);
+    writeTeacherClasses(classes);
+    teacherClassInput.value = '';
+    teacherClassMessage.textContent = '';
+    renderTeacherClasses();
+}
+
+if (currentRole === 'teacher') {
+    teacherClassContainer.style.display = 'block';
+    updateTeacherClassFormatHint();
+    renderTeacherClasses();
+    teacherClassSummary.addEventListener('click', () => {
+        teacherClassDetails.style.display = teacherClassDetails.style.display === 'none' ? 'block' : 'none';
+    });
+    document.getElementById('addTeacherClassBtn').addEventListener('click', addTeacherClass);
+    teacherClassInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            addTeacherClass();
+        }
+    });
+    teacherClassInput.addEventListener('input', () => {
+        teacherClassMessage.textContent = '';
+    });
+}
+
+accountSummary.addEventListener('click', function() {
+    const open = accountDetails.style.display !== 'none';
+    accountDetails.style.display = open ? 'none' : 'block';
+});
+
+darkModeButton.addEventListener('click', toggleDarkMode);
+
+if (classFormatSummary && classFormatDetails) {
+    classFormatSummary.addEventListener('click', function() {
+        const open = classFormatDetails.style.display !== 'none';
+        classFormatDetails.style.display = open ? 'none' : 'block';
+    });
+
+    classFormatNumber.addEventListener('change', function() {
+        if (classFormatNumber.checked) {
+            localStorage.setItem(classFormatStorageKey, 'number');
+            updateClassFormatUI();
+        }
+    });
+
+    classFormatLetter.addEventListener('change', function() {
+        if (classFormatLetter.checked) {
+            localStorage.setItem(classFormatStorageKey, 'letter');
+            updateClassFormatUI();
+        }
+    });
+}
+
+aboutButton.addEventListener('click', function() {
+    window.location.href = 'about.html';
+});
+
+logoutButton.addEventListener('click', async function() {
+    if (confirm('Are you sure you want to log out?')) {
+        try {
+            await window.UrskoolApi.request('api/auth.php?action=logout', { method: 'POST' });
+        } catch (error) {
+            alert(error.message || 'Unable to contact the server to log out. Please try again.');
+            return;
+        }
+        window.UrskoolApi.clearAuthCache();
+        ['schoolUsersRegistry', 'schoolChatMessages', 'schoolChatConversations'].forEach(key => localStorage.removeItem(key));
+        localStorage.removeItem(profileStorageKey);
+        window.location.replace('login.html');
+    }
+});
+
+// Settings-page legacy banner removed - banner now shows once on homepage via tab-bar.js
+
+// ============================================================
+// SAVED POSTS SUMMARY (mirrors admin-feed.html bookmark identity)
+// ============================================================
+function getSavedPostsCount(){
+    const fullName = savedProfile.fullName || `${(savedProfile.firstName || '').trim()} ${(savedProfile.lastName || '').trim()}`.trim() || 'User';
+    const email = (savedProfile.email || '').trim().toLowerCase();
+    const ids = [email, fullName, 'user:' + fullName];
+    try {
+        const posts = JSON.parse(localStorage.getItem('schoolAdminFeed') || '[]');
+        if (!Array.isArray(posts)) return 0;
+        return posts.filter((post) => Array.isArray(post.savedBy) && post.savedBy.some((id) => ids.includes(id))).length;
+    } catch (error) {
+        return 0;
+    }
+}
+
+(function updateSavedSummary(){
+    const summary = document.getElementById('savedSummaryText');
+    if (!summary) return;
+    const count = getSavedPostsCount();
+    summary.textContent = count === 1 ? '1 saved post' : `${count} saved posts`;
+})();
+
+loadDarkMode();
+</script>
+<script src="tab-bar.js"></script>
+</body>
+</html>
