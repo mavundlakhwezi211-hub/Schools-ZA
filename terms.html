@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terms of Service | UrSKOOL</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;}
+body{min-height:100vh;padding:24px clamp(16px,5vw,40px) 40px;background:linear-gradient(135deg,#f3f7ff 0%,#eef4fb 100%);color:#173b5e;text-align:left;}
+body.dark-mode{background:linear-gradient(135deg,#0d1a2b 0%,#091420 100%);color:#c8d8e8;}
+.page{width:min(860px,100%);margin:0 auto;padding:0;text-align:left;}
+.top-bar{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:20px;}
+/* ===== Back button: circle + chevron (scaled to the app, colour follows the page text colour) ===== */
+.back-btn{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;flex:0 0 auto;border:2.5px solid currentColor;border-radius:50%;padding:0;background:transparent;color:inherit;cursor:pointer;text-decoration:none;line-height:1;transition:transform .2s ease,opacity .2s ease;}
+.back-btn .arrow{display:block;width:11px;height:11px;border-top:2.5px solid currentColor;border-left:2.5px solid currentColor;transform:rotate(-45deg);margin-left:4px;}
+.back-btn:hover{transform:scale(1.06);opacity:.8;}
+.back-btn:focus-visible{outline:2px solid #3a79b8;outline-offset:3px;}
+@media (max-width:540px){.back-btn{width:34px;height:34px;border-width:2px;}.back-btn .arrow{width:9px;height:9px;border-top-width:2px;border-left-width:2px;margin-left:3px;}}
+.legal-logo{width:140px;height:auto;display:block;}
+h1{font-size:32px;font-weight:800;margin-bottom:4px;text-align:left;}
+.meta{font-size:13px;font-weight:600;color:#5d6f80;margin-bottom:14px;text-align:left;}
+body.dark-mode .meta{color:#7a9dba;}
+.lead{font-size:16px;line-height:1.7;margin-bottom:12px;text-align:left;}
+h2{font-size:16px;margin:22px 0 8px;text-transform:uppercase;letter-spacing:.04em;text-align:left;}
+p,li{font-size:15px;line-height:1.75;text-align:left;}
+ul{padding-left:20px;display:grid;gap:6px;margin-top:6px;}
+a{color:#3a79b8;font-weight:600;}
+.contact-box{margin-top:18px;font-size:14px;line-height:1.7;text-align:left;}
+.foot{margin-top:20px;font-size:12px;color:#5d6f80;display:grid;gap:6px;text-align:left;}
+body.dark-mode .foot{color:#7a9dba;}
+</style>
+</head>
+<body>
+<main class="page">
+<div class="top-bar"><a href="settings.html" class="back-btn" aria-label="Go back"><span class="arrow"></span></a><img id="legalLogo" class="legal-logo" src="urskool-logo.png" alt="UrSKOOL logo" width="140"></div>
+<h1>Terms of Service</h1>
+<p class="meta">UrSKOOL &middot; Last updated: 30 September 2026</p>
+<p class="lead">These Terms of Service are a binding agreement between you and UrSKOOL ("Company", "we", "us") for your use of <strong>UrSkool.co.za</strong> and the UrSKOOL app (the "Site"). By using the Site you agree to these terms. If you do not agree, do not use the Site.</p>
+<h2>Agreement to terms</h2>
+<p>Supplemental documents posted on the Site form part of these terms. We may change these terms at any time by updating the date above; your continued use after posting means you accept the changes. The Site is intended for users at least 13 years old; minors under 18 need a parent or guardian's permission and supervision.</p>
+<h2>Intellectual property rights</h2>
+<p>Unless stated otherwise, the Site, including code, designs, text, graphics and logos, is owned by UrSKOOL. You may use the Site for personal, non-commercial school use only. Do not copy, reproduce or misuse our content without written permission.</p>
+<h2>User accounts</h2>
+<ul><li>Give accurate name, email, role, school, grade and province details.</li><li>Keep your device secure. One account per person.</li><li>Learners must use the app with parent, guardian or teacher guidance.</li></ul>
+<h2>Acceptable use</h2>
+<ul><li>No bullying, hateful, false or harmful content.</li><li>No sharing other people's personal information without permission.</li><li>No spam, viruses or unlawful uploads.</li><li>No impersonation or account misuse.</li><li>No disrupting, copying or breaking the service.</li></ul>
+<h2>User content</h2>
+<p>You keep ownership of what you post. By posting, you allow UrSKOOL and your school community to display it inside the app so the service works. Do not post content you have no right to share. Treat marks, attendance and announcements as confidential to your school community.</p>
+<h2>Availability and data</h2>
+<p>The service is provided "as is" and may be unavailable during maintenance. We are not liable for loss or corruption of data; please keep your own backups of important school work.</p>
+<h2>Limitation of liability</h2>
+<p>To the maximum extent allowed by South African law, UrSKOOL is not liable for indirect or consequential loss arising from use of the Site.</p>
+<h2>Termination</h2>
+<p>We may suspend accounts that breach these terms or harm others. You may stop using the Site and ask us to delete your account data at any time.</p>
+<h2>Governing law</h2>
+<p>These terms are governed by the laws of the Republic of South Africa.</p>
+<div class="contact-box"><strong>Contact us</strong><br>UrSKOOL<br>Website: <a href="https://urskool.co.za">UrSkool.co.za</a> &middot; Email: <a href="mailto:hello@urskool.co.za">hello@urskool.co.za</a></div>
+<div class="foot"><span>Related: <a href="privacy-policy.html">Privacy Policy</a> &middot; <a href="about.html">About us</a></span><span>&copy; 2026 UrSKOOL. All rights reserved.</span></div>
+</main>
+<script>(function(){var d=localStorage.getItem('schoolDarkMode')==='true';document.body.classList.toggle('dark-mode',d);document.getElementById('legalLogo').src=d?'urskool-logo-dark.png':'urskool-logo.png';})();</script>
+</body>
+</html>
+

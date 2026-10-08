@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verification</title>
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            -webkit-font-smoothing:antialiased;
+            -moz-osx-font-smoothing:grayscale;
+            font-feature-settings:"liga" 1;
+        }
+
+        body{
+            margin:0;
+            min-height:100vh;
+            background:linear-gradient(135deg,#f9fbfc,#e8f0f4);
+            color:#111;
+            display:flex;
+            justify-content:center;
+            align-items:flex-start;
+            padding:clamp(52px,11vh,104px) 20px 28px;
+            overflow-x:hidden;
+        }
+
+        .verification-container{
+            width:100%;
+            max-width:520px;
+            background:rgba(255,255,255,.48);
+            border:1px solid rgba(255,255,255,.85);
+            border-radius:16px;
+            box-shadow:0 20px 48px rgba(23,59,94,.1),inset 0 1px 0 rgba(255,255,255,.68);
+            padding:clamp(24px,5vw,40px);
+            text-align:center;
+            -webkit-backdrop-filter:blur(18px);
+            backdrop-filter:blur(18px);
+        }
+
+        h1{
+            text-align:center;
+            font-size:clamp(2rem,5vw,2.7rem);
+            line-height:1.15;
+            color:#111;
+            margin-bottom:14px;
+        }
+
+        .subtitle{
+            text-align:center;
+            color:#666;
+            line-height:1.6;
+            margin-bottom:30px;
+            font-size:clamp(1rem,2.5vw,1.15rem);
+        }
+
+        .code-inputs{
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap:10px;
+            margin-bottom:20px;
+        }
+
+        .code-input{
+            width:52px;
+            min-width:0;
+            flex:0 1 auto;
+            height:56px;
+            font-size:24px;
+            font-weight:600;
+            text-align:center;
+            border:1px solid #dcdcdc;
+            border-radius:10px;
+            background:rgba(255,255,255,.68);
+            -webkit-backdrop-filter:blur(10px);
+            backdrop-filter:blur(10px);
+            outline:none;
+            transition:all 0.2s ease;
+        }
+
+        .code-input:focus{
+            border-color:#000;
+            box-shadow:0 0 0 2px rgba(0,0,0,0.05);
+        }
+
+        .divider{
+            color:#aaa;
+            font-size:18px;
+            padding:0 4px;
+        }
+
+        .resend-btn{
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            min-height:40px;
+            padding:9px 18px;
+            border:1px solid rgba(255,255,255,.86);
+            border-radius:999px;
+            background:rgba(255,255,255,.46);
+            color:#173b5e;
+            font-size:13px;
+            font-weight:650;
+            cursor:pointer;
+            margin-bottom:20px;
+            display:inline-block;
+            -webkit-backdrop-filter:blur(12px);
+            backdrop-filter:blur(12px);
+        }
+
+        .continue-btn{
+            width:100%;
+            min-height:52px;
+            padding:14px 20px;
+            border-radius:999px;
+            font-size:16px;
+            font-weight:700;
+            border:1px solid rgba(255,255,255,.8);
+            cursor:not-allowed;
+            background:rgba(255,255,255,.46);
+            color:#82909a;
+            -webkit-backdrop-filter:blur(12px);
+            backdrop-filter:blur(12px);
+            box-shadow:0 8px 20px rgba(23,59,94,.08);
+            transition:background 0.2s ease, transform 0.2s ease;
+        }
+
+        .continue-btn.active{
+            background:rgba(23,59,94,.82);
+            color:#fff;
+            cursor:pointer;
+            box-shadow:0 10px 24px rgba(23,59,94,.18),inset 0 1px 0 rgba(255,255,255,.18);
+        }
+
+        .continue-btn.active:hover{
+            background:rgba(15,42,69,.92);
+            transform:translateY(-1px);
+        }
+
+        .resend-btn:hover{background:rgba(23,59,94,.9);color:#fff;}
+        .continue-btn:focus-visible,.resend-btn:focus-visible{outline:3px solid #2a9d8f;outline-offset:3px;}
+
+        .status-message{
+            min-height:20px;
+            margin-top:14px;
+            color:#666;
+            font-size:13px;
+        }
+
+        @media (max-width: 420px){
+            body{
+                padding:42px 14px 20px;
+            }
+
+            .verification-container{
+                padding:22px 16px;
+            }
+
+            .code-inputs{
+                gap:8px;
+            }
+
+            .code-input{
+                width:48px;
+                height:52px;
+                font-size:22px;
+            }
+
+            h1{font-size:2.15rem;}
+            .subtitle{font-size:1rem;}
+            .continue-btn{font-size:16px;padding:14px;}
+        }
+
+        @media (max-width: 320px){
+            .code-input{
+                width:38px;
+                height:46px;
+                font-size:20px;
+            }
+
+            .verification-container{padding:20px 10px;}
+            .code-inputs{gap:6px;}
+            .divider{padding:0 2px;}
+
+            h1{font-size:1.9rem;}
+            .subtitle{font-size:0.95rem;}
+        }
+    </style>
+    <script src="api-client.js"></script>
+</head>
+<body>
+    <div class="verification-container">
+        <h1>Verify Your Email Address</h1>
+        <p class="subtitle">Please enter the 6-digit code we sent to<br><strong id="emailBox">you@example.com</strong></p>
+
+        <div class="code-inputs" aria-label="Verification code">
+            <input class="code-input" type="text" maxlength="1" pattern="\d*" inputmode="numeric" aria-label="Digit 1" autofocus>
+            <input class="code-input" type="text" maxlength="1" pattern="\d*" inputmode="numeric" aria-label="Digit 2">
+            <input class="code-input" type="text" maxlength="1" pattern="\d*" inputmode="numeric" aria-label="Digit 3">
+            <span class="divider" aria-hidden="true">—</span>
+            <input class="code-input" type="text" maxlength="1" pattern="\d*" inputmode="numeric" aria-label="Digit 4">
+            <input class="code-input" type="text" maxlength="1" pattern="\d*" inputmode="numeric" aria-label="Digit 5">
+            <input class="code-input" type="text" maxlength="1" pattern="\d*" inputmode="numeric" aria-label="Digit 6">
+        </div>
+
+        <button class="resend-btn" id="resendBtn" type="button">Send Again</button>
+        <button class="continue-btn" id="continueBtn" type="button" disabled>Continue</button>
+        <div class="status-message" id="statusMessage" aria-live="polite"></div>
+    </div>
+
+    <script>
+        const emailBox = document.getElementById('emailBox');
+        const statusMessage = document.getElementById('statusMessage');
+        const continueBtn = document.getElementById('continueBtn');
+        const resendBtn = document.getElementById('resendBtn');
+        const inputs = [...document.querySelectorAll('.code-input')];
+        let pendingPurpose = 'signup';
+        let demoCode = '';
+
+        function updateStatus(message, isError = false) {
+            statusMessage.textContent = message;
+            statusMessage.style.color = isError ? '#b42318' : '#5d6f80';
+        }
+
+        function checkCompletion() {
+            const complete = inputs.every(input => /^[0-9]$/.test(input.value));
+            continueBtn.disabled = !complete;
+            continueBtn.classList.toggle('active', complete);
+        }
+
+        async function sendCode(isResend = false) {
+            resendBtn.disabled = true;
+            updateStatus(isResend ? 'Sending a new verification code...' : 'Sending verification code...');
+            try {
+                await window.UrskoolApi.request('api/auth.php?action=otp-request', {
+                    method: 'POST',
+                    body: { method: 'email' }
+                });
+                updateStatus(demoCode
+                    ? 'Demo mode: enter the demo code ' + demoCode + '. No email was sent.'
+                    : (isResend ? 'A new verification code has been sent.' : 'A verification code has been sent.'));
+            } catch (error) {
+                updateStatus(error.message || 'We could not send the verification email. Please try again.', true);
+            } finally {
+                resendBtn.disabled = false;
+            }
+        }
+
+        async function verifyCode() {
+            const rawCode = inputs.map(input => input.value).join('');
+            // TEMPORARY TEST MODE (reset later): accept 111-111 with or without the dash.
+            const code = rawCode.replace(/\D/g, '');
+            if (code.length !== 6) {
+                updateStatus('Please enter the full 6-digit code.', true);
+                return;
+            }
+            if (code === '111111') {
+                try { localStorage.removeItem('otpDeliveryMethod'); } catch (storageError) {}
+                updateStatus('Test code accepted. Redirecting...');
+                window.setTimeout(() => { window.location.href = 'profile-success.html'; }, 800);
+                return;
+            }
+
+            continueBtn.disabled = true;
+            try {
+                const result = await window.UrskoolApi.request('api/auth.php?action=otp-verify', {
+                    method: 'POST',
+                    body: { method: 'email', code }
+                });
+                window.UrskoolApi.cacheUser(result.user);
+                localStorage.removeItem('otpDeliveryMethod');
+                updateStatus('Email verified successfully. Redirecting...');
+                window.setTimeout(() => {
+                    window.location.href = result.purpose === 'login' ? 'admin-feed.html' : 'profile-success.html';
+                }, 800);
+            } catch (error) {
+                updateStatus(error.message || 'We could not verify this code. Please try again.', true);
+                checkCompletion();
+            }
+        }
+
+        async function loadPendingVerification() {
+            if (localStorage.getItem('otpDeliveryMethod') !== 'email') {
+                // TEMPORARY TEST MODE: do not force otp-method.html when arriving from Create Profile offline.
+                try {
+                    const cached = JSON.parse(localStorage.getItem('schoolProfileData') || 'null');
+                    if (cached && (cached.email || cached.fullName || cached.firstName)) {
+                        emailBox.textContent = cached.email || 'test mode';
+                        updateStatus('Test mode: enter 111-111 to continue. No email was sent.');
+                        return;
+                    }
+                } catch (error) {}
+                window.location.replace('otp-method.html');
+                return;
+            }
+            try {
+                const result = await window.UrskoolApi.request('api/auth.php?action=pending');
+                pendingPurpose = result.purpose;
+                demoCode = result.demoCode || '';
+                window.UrskoolApi.cacheUser(result.user);
+                emailBox.textContent = result.user.email;
+                await sendCode(false);
+            } catch (error) {
+                updateStatus(error.message || 'There is no pending email verification.', true);
+                resendBtn.disabled = true;
+                continueBtn.disabled = true;
+            }
+        }
+
+        inputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                const value = e.target.value.replace(/\D/g, '').slice(0, 1);
+                e.target.value = value;
+
+                if (value && index < inputs.length - 1) {
+                    inputs[index + 1].focus();
+                }
+                checkCompletion();
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !input.value && index > 0) {
+                    inputs[index - 1].focus();
+                }
+            });
+
+            input.addEventListener('paste', (e) => {
+                const pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, inputs.length);
+                if (!pasted) return;
+                e.preventDefault();
+                pasted.split('').forEach((char, i) => {
+                    if (inputs[i]) inputs[i].value = char;
+                });
+                const nextIndex = Math.min(pasted.length, inputs.length - 1);
+                inputs[nextIndex].focus();
+                checkCompletion();
+            });
+        });
+
+        continueBtn.addEventListener('click', verifyCode);
+        resendBtn.addEventListener('click', () => sendCode(true));
+        loadPendingVerification();
+    </script>
+</body>
+</html>
